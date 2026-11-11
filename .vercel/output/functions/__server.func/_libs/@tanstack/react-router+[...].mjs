@@ -1,7 +1,7 @@
-import { i as __toESM, r as __require, t as __commonJSMin } from "../../_runtime.mjs";
+import { i as __require, o as __toESM, t as __commonJSMin } from "../../_runtime.mjs";
 import { a as require_jsx_runtime, o as require_react } from "../@radix-ui/react-collection+[...].mjs";
-import { n as require_react_dom } from "../@radix-ui/react-primitive+[...].mjs";
 import { i as parseHref, r as normalizeProtocolRelative } from "../tanstack__history.mjs";
+import { n as require_react_dom } from "../@radix-ui/react-primitive+[...].mjs";
 import { PassThrough, Readable } from "node:stream";
 //#region node_modules/@tanstack/router-core/dist/esm/not-found.js
 /** Determine if a value is a TanStack Router not-found error. */
@@ -46,6 +46,10 @@ function redirect(opts) {
 /** Check whether a value is a TanStack Router redirect Response. */
 function isRedirect(obj) {
 	return obj instanceof Response && !!obj.options;
+}
+/** Parse a serialized redirect object back into a redirect Response. */
+function parseRedirect(obj) {
+	if (obj !== null && typeof obj === "object" && obj.isSerializedRedirect) return redirect(obj);
 }
 //#endregion
 //#region node_modules/@tanstack/router-core/dist/esm/ssr/ssr-match-id.js
@@ -3521,7 +3525,6 @@ var BaseRootRoute = class extends BaseRoute {
 };
 //#endregion
 //#region node_modules/seroval/dist/index.js
-var import_jsx_runtime = require_jsx_runtime();
 var SYM_ASYNC_ITERATOR = Symbol.asyncIterator;
 var SYM_HAS_INSTANCE = Symbol.hasInstance;
 var SYM_IS_CONCAT_SPREADABLE = Symbol.isConcatSpreadable;
@@ -6285,6 +6288,7 @@ function fromJSON(source, options = {}) {
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/CatchBoundary.js
+var import_jsx_runtime = require_jsx_runtime();
 var CatchBoundary = class extends import_react.Component {
 	constructor(..._args) {
 		super(..._args);
@@ -17641,4 +17645,4 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 	}
 };
 //#endregion
-export { getStylesheetHref as A, isPromise as B, fromJSON as C, createInlineCssPlaceholderAsset as D, toCrossJSONStream as E, executeRewriteInput as F, isRedirect as H, invariant as I, createSieveCache as L, resolveManifestCssLink as M, waitForReason as N, createInlineCssStyleAsset as O, _getRenderedMatches as P, decodePath as R, crossSerializeStream as S, toCrossJSONAsync as T, rootRouteId as U, dehydrateSsrMatchId as V, isNotFound as W, createFileRoute as _, isSsrResponse as a, createPlugin as b, stripSsrResponseBody as c, Scripts as d, HeadContent as f, lazyRouteComponent as g, Outlet as h, disposeSsrResponse as i, resolveManifestAssetLink as j, getScriptPreloadAttrs as k, createHydrationScripts as l, createRouter as m, bindSsrResponseToRequest as n, normalizeSsrResponse as o, RouterProvider as p, defineHandlerCallback as r, replaceSsrResponse as s, renderRouterToStream as t, GLOBAL_TSR as u, createRootRoute as v, isStream as w, createStream as x, useRouter as y, isDangerousProtocol as z };
+export { getStylesheetHref as A, isPromise as B, fromJSON as C, createInlineCssPlaceholderAsset as D, toCrossJSONStream as E, executeRewriteInput as F, isNotFound as G, isRedirect as H, invariant as I, createSieveCache as L, resolveManifestCssLink as M, waitForReason as N, createInlineCssStyleAsset as O, _getRenderedMatches as P, decodePath as R, crossSerializeStream as S, toCrossJSONAsync as T, parseRedirect as U, dehydrateSsrMatchId as V, rootRouteId as W, createFileRoute as _, isSsrResponse as a, createPlugin as b, stripSsrResponseBody as c, Scripts as d, HeadContent as f, lazyRouteComponent as g, Outlet as h, disposeSsrResponse as i, resolveManifestAssetLink as j, getScriptPreloadAttrs as k, createHydrationScripts as l, createRouter as m, bindSsrResponseToRequest as n, normalizeSsrResponse as o, RouterProvider as p, defineHandlerCallback as r, replaceSsrResponse as s, renderRouterToStream as t, GLOBAL_TSR as u, createRootRoute as v, isStream as w, createStream as x, useRouter as y, isDangerousProtocol as z };
