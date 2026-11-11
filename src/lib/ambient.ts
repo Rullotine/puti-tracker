@@ -1,9 +1,21 @@
 /**
  * Lightweight Web Audio ambient generator.
  * No external assets — keeps the bundle small.
+ * Extra lofi / cozy textures added for chill sessions.
  */
 
-export type AmbientId = "off" | "pink" | "brown" | "rain" | "waves" | "wind";
+export type AmbientId =
+  | "off"
+  | "pink"
+  | "brown"
+  | "rain"
+  | "waves"
+  | "wind"
+  | "lofi"
+  | "campfire"
+  | "cafe"
+  | "forest"
+  | "vinyl";
 
 export const AMBIENTS: { id: AmbientId; label: string }[] = [
   { id: "off", label: "Off" },
@@ -12,6 +24,11 @@ export const AMBIENTS: { id: AmbientId; label: string }[] = [
   { id: "rain", label: "Rain" },
   { id: "waves", label: "Waves" },
   { id: "wind", label: "Wind" },
+  { id: "lofi", label: "Lofi hum" },
+  { id: "campfire", label: "Campfire" },
+  { id: "cafe", label: "Cafe" },
+  { id: "forest", label: "Forest" },
+  { id: "vinyl", label: "Vinyl crackle" },
 ];
 
 type Nodes = {
@@ -34,7 +51,6 @@ function createNoiseBuffer(ctx: AudioContext, seconds = 2): AudioBuffer {
 
 /** Paul Kellet style pink noise filter */
 function pinkFilter(ctx: AudioContext, source: AudioNode): AudioNode {
-  // Simple multi-biquad approximation
   const b0 = ctx.createBiquadFilter();
   b0.type = "lowshelf";
   b0.frequency.value = 100;
@@ -110,6 +126,86 @@ function windFilter(ctx: AudioContext, source: AudioNode): AudioNode {
   return lp;
 }
 
+/** Soft low-pass + slow tremolo for lofi room hum */
+function lofiFilter(ctx: AudioContext, source: AudioNode, gain: GainNode): AudioNode {
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 1200;
+  lp.Q.value = 0.6;
+  const lfo = ctx.createOscillator();
+  lfo.type = "sine";
+  lfo.frequency.value = 0.12;
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = 0.12;
+  lfo.connect(lfoGain);
+  lfoGain.connect(gain.gain);
+  lfo.start();
+  source.connect(lp);
+  return lp;
+}
+
+/** Crackly campfire: noise + intermittent pops via gain modulation */
+function campfireFilter(ctx: AudioContext, source: AudioNode): AudioNode {
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 800;
+  lp.Q.value = 1.2;
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 80;
+  source.connect(hp);
+  hp.connect(lp);
+  return lp;
+}
+
+/** Soft cafe murmur approximation */
+function cafeFilter(ctx: AudioContext, source: AudioNode): AudioNode {
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = 600;
+  bp.Q.value = 0.8;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 2800;
+  source.connect(bp);
+  bp.connect(lp);
+  return lp;
+}
+
+/** Forest: filtered noise + occasional higher “leaves” */
+function forestFilter(ctx: AudioContext, source: AudioNode): AudioNode {
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 200;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 3500;
+  const peaking = ctx.createBiquadFilter();
+  peaking.type = "peaking";
+  peaking.frequency.value = 1800;
+  peaking.Q.value = 0.7;
+  peaking.gain.value = 3;
+  source.connect(hp);
+  hp.connect(lp);
+  lp.connect(peaking);
+  return peaking;
+}
+
+/** Vinyl crackle: high-passed sparse noise */
+function vinylFilter(ctx: AudioContext, source: AudioNode): AudioNode {
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 1500;
+  const peaking = ctx.createBiquadFilter();
+  peaking.type = "peaking";
+  peaking.frequency.value = 4000;
+  peaking.Q.value = 1.5;
+  peaking.gain.value = 6;
+  source.connect(hp);
+  hp.connect(peaking);
+  return peaking;
+}
+
 export function setAmbient(id: AmbientId, volume = 0.35) {
   stopAmbient();
   if (id === "off" || typeof window === "undefined") return;
@@ -124,18 +220,34 @@ export function setAmbient(id: AmbientId, volume = 0.35) {
   source.buffer = buffer;
   source.loop = true;
 
-  let out: AudioNode = source;
   const extras: AudioNode[] = [];
+  let out: AudioNode = source;
 
-  if (id === "pink") out = pinkFilter(ctx, source);
-  else if (id === "brown") out = brownFilter(ctx, source);
-  else if (id === "rain") out = rainFilter(ctx, source);
-  else if (id === "waves") {
+  if (id === "pink") {
+    out = pinkFilter(ctx, source);
+  } else if (id === "brown") {
+    out = brownFilter(ctx, source);
+  } else if (id === "rain") {
+    out = rainFilter(ctx, source);
+  } else if (id === "waves") {
     out = brownFilter(ctx, source);
     const lfo = wavesLfo(ctx, gain);
     extras.push(lfo);
   } else if (id === "wind") {
     out = windFilter(ctx, source);
+  } else if (id === "lofi") {
+    out = lofiFilter(ctx, source, gain);
+  } else if (id === "campfire") {
+    out = campfireFilter(ctx, source);
+    // slightly lower volume for crackle
+    gain.gain.value *= 0.85;
+  } else if (id === "cafe") {
+    out = cafeFilter(ctx, source);
+  } else if (id === "forest") {
+    out = forestFilter(ctx, source);
+  } else if (id === "vinyl") {
+    out = vinylFilter(ctx, source);
+    gain.gain.value *= 0.55;
   }
 
   out.connect(gain);

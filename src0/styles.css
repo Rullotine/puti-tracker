@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #071018;
+  --color-ink: #0c1822;
+  --color-surface: #122331;
+  --color-fg: #e8f6f4;
+  --color-muted: #93b0b4;
+  --color-primary: #3ee0c3;
+  --color-primary-deep: #2ed4b0;
+  --color-on-primary: #04241d;
+  --color-line: #23404a;
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    background-image:
+      radial-gradient(920px 520px at -8% -18%, color-mix(in oklab, var(--color-primary) 28%, transparent), transparent 62%),
+      radial-gradient(720px 460px at 112% -8%, color-mix(in oklab, var(--color-primary-deep) 34%, transparent), transparent 58%),
+      linear-gradient(180deg, var(--color-ink), var(--color-bg) 46%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-primary) 16%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-primary) 16%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    animation: grid-drift 22s linear infinite;
+    mask-image: radial-gradient(ellipse at 50% 0%, #000 15%, transparent 72%);
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: 22%;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent);
+    animation: scan 8s linear infinite;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  input[type="range"] {
+    accent-color: var(--color-primary);
+  }
+}
+
+@layer components {
+  .panel {
+    border-radius: var(--radius-card);
+    background:
+      linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+      linear-gradient(155deg, color-mix(in oklab, var(--color-primary) 50%, transparent), transparent 46%) border-box;
+    border: 1px solid transparent;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.75rem;
+    padding-inline: 1rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition: transform 160ms ease, filter 160ms ease, background-color 160ms ease;
+  }
+
+  .btn:not(:disabled):hover {
+    filter: brightness(1.06);
+  }
+
+  .btn:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+  }
+
+  .btn-primary {
+    background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-deep));
+    color: var(--color-on-primary);
+  }
+
+  .btn-ghost {
+    background: var(--color-ink);
+    color: var(--color-fg);
+    border-color: var(--color-line);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--color-muted);
+    border-color: var(--color-line);
+  }
+
+  .field {
+    height: 2.75rem;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-ink);
+    padding-inline: 0.75rem;
+    color: var(--color-fg);
+    outline: none;
+  }
+
+  .field:focus {
+    border-color: var(--color-primary);
+  }
+
+  .lamp-on {
+    background: linear-gradient(180deg, var(--color-primary), var(--color-primary-deep));
+    box-shadow: 0 0 14px color-mix(in oklab, var(--color-primary) 65%, transparent);
+  }
+
+  .tab[data-state="active"] {
+    background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-deep));
+    color: var(--color-on-primary);
+    border-color: transparent;
+  }
+
+  .hud-spin {
+    animation: spin 14s linear infinite;
+    transform-origin: 50% 50%;
+  }
+
+  .timer-flicker {
+    animation: flicker 4.8s infinite;
+  }
+}
+
+@keyframes grid-drift {
+  to { background-position: 56px 56px; }
+}
+
+@keyframes scan {
+  from { top: -25%; }
+  to { top: 110%; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes flicker {
+  0%, 91%, 100% { opacity: 1; }
+  93% { opacity: 0.55; }
+  95% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .hud-spin,
+  .timer-flicker,
+  body::before,
+  body::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+
+/* Soft ambient drift for void / dark desks */
+@keyframes void-drift {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+
+html[data-theme="void"] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 20%, color-mix(in oklab, var(--color-primary) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 80% 70%, color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 50%),
+    linear-gradient(160deg, #050508, #0c0c14 45%, #080810);
+  background-size: 140% 140%, 140% 140%, 100% 100%;
+  animation: void-drift 28s ease-in-out infinite;
+}

@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Panel } from "@/components/ui";
 import { useTracker } from "@/lib/store";
 import { playClick } from "@/lib/sounds";
 import { authClient, authEnabled, GROK_PROVIDERS } from "@/lib/auth/client";
 import { THEMES } from "@/lib/themes";
 import { cn } from "@/lib/utils";
+import {
+  isCozyMusicPlaying,
+  startCozyMusic,
+  stopCozyMusic,
+  setCozyMusicVolume,
+} from "@/lib/cozy-music";
 
 export function ThemesView() {
   const theme = useTracker((state) => state.theme);
@@ -12,14 +18,35 @@ export function ThemesView() {
   const displayName = useTracker((state) => state.displayName);
   const setDisplayName = useTracker((state) => state.setDisplayName);
   const [name, setName] = useState(displayName);
+  const [cozyOn, setCozyOn] = useState(false);
+  const [cozyVol, setCozyVol] = useState(0.3);
   const lights = THEMES.filter((item) => item.mode === "light");
   const darks = THEMES.filter((item) => item.mode === "dark");
+
+  useEffect(() => {
+    setCozyOn(isCozyMusicPlaying());
+  }, []);
+
+  useEffect(() => {
+    if (cozyOn) {
+      startCozyMusic(cozyVol);
+    } else {
+      stopCozyMusic();
+    }
+    return () => stopCozyMusic();
+  }, [cozyOn]);
+
+  useEffect(() => {
+    if (cozyOn) setCozyMusicVolume(cozyVol);
+  }, [cozyVol, cozyOn]);
 
   return (
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="font-display text-2xl font-semibold">Themes</h1>
-        <p className="mt-1 text-sm text-muted">{THEMES.length} desks, {lights.length} of them light. The grid and scan follow the accent.</p>
+        <p className="mt-1 text-sm text-muted">
+          {THEMES.length} desks, {lights.length} light · Minecraft font auto-applies on the Minecraft theme
+        </p>
       </header>
       <Panel title="Your name">
         <form
@@ -36,7 +63,7 @@ export function ThemesView() {
       </Panel>
       <ThemeGrid title="Dark" items={darks} current={theme} onPick={setTheme} />
       <ThemeGrid title="Light" items={lights} current={theme} onPick={setTheme} />
-    
+
       <Panel title="Sounds">
         <label className="flex items-center justify-between gap-3 text-sm">
           <span>Click sounds</span>
@@ -52,6 +79,34 @@ export function ThemesView() {
         <p className="mt-2 text-xs text-muted">Soft ticks when you move around the app. Focus ambient lives in Focus.</p>
       </Panel>
 
+      <Panel title="Cozy background music">
+        <label className="flex items-center justify-between gap-3 text-sm">
+          <span>Soft pad music</span>
+          <input
+            type="checkbox"
+            checked={cozyOn}
+            onChange={(e) => setCozyOn(e.target.checked)}
+          />
+        </label>
+        {cozyOn && (
+          <label className="mt-3 block text-sm">
+            <span className="text-muted">Volume</span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={cozyVol}
+              className="mt-1 w-full"
+              onChange={(e) => setCozyVol(Number(e.target.value))}
+            />
+          </label>
+        )}
+        <p className="mt-2 text-xs text-muted">
+          Gentle procedural pad that loops quietly in the background. Completely optional.
+        </p>
+      </Panel>
+
       <Panel title="Account (optional)">
         <p className="text-sm text-muted">
           Data stays on this device by default. Link Google only if you want the same profile on another browser — still optional.
@@ -64,7 +119,6 @@ export function ThemesView() {
 
 function AccountLink() {
   const enabled = authEnabled;
-  // soft optional UI — avoids hard dependency when auth is off
   if (!enabled) {
     return <p className="mt-2 text-xs text-muted">Account linking is off in this build. Export/import still works for moving data.</p>;
   }
@@ -86,7 +140,6 @@ function AccountLink() {
   );
 }
 
-
 function ThemeGrid({
   title,
   items,
@@ -107,12 +160,19 @@ function ThemeGrid({
             type="button"
             onClick={() => onPick(item.id)}
             aria-pressed={current === item.id}
-            className={cn("h-28 rounded-2xl border p-3 text-left", current === item.id ? "border-primary" : "border-transparent")}
+            className={cn(
+              "h-28 rounded-2xl border p-3 text-left",
+              current === item.id ? "border-primary" : "border-transparent",
+              item.id === "minecraft" && "font-minecraft",
+            )}
             style={{ background: item.surface, color: item.fg }}
           >
             <span className="block h-2 w-12 rounded-full" style={{ background: item.primary }} />
             <span className="mt-4 block font-display font-semibold">{item.name}</span>
-            <span className="text-xs" style={{ color: item.muted }}>{item.mode}</span>
+            <span className="text-xs" style={{ color: item.muted }}>
+              {item.mode}
+              {item.special ? ` · ${item.special}` : ""}
+            </span>
           </button>
         ))}
       </div>

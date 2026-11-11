@@ -121,7 +121,7 @@ function Brand({ onAlerts }: { onAlerts: () => void }) {
   return (
     <div className="flex items-start justify-between gap-2">
       <div>
-        <p className="font-display text-xl font-semibold tracking-tight">PUTI Tracker</p>
+        <p className="font-display text-xl font-semibold tracking-tight">Tracker</p>
         <p className="text-xs text-muted">by ks2v</p>
       </div>
       <button type="button" className="btn btn-ghost relative h-11 w-11 px-0" aria-label="Alerts" onClick={onAlerts}>
@@ -207,7 +207,7 @@ function DataTools() {
 
   return (
     <section className="mt-4 border-t border-line pt-4">
-      <p className="text-sm text-muted">Data stays in this browser. Export a backup before you switch devices. PUTI Tracker · ks2v</p>
+      <p className="text-sm text-muted">Data stays in this browser. Export a backup before you switch devices. Tracker · ks2v</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
@@ -217,7 +217,7 @@ function DataTools() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = "PUTI-Tracker-backup.json";
+            link.download = "Tracker-backup.json";
             link.click();
             URL.revokeObjectURL(url);
             setMessage("Backup downloaded.");
@@ -233,7 +233,7 @@ function DataTools() {
           type="button"
           className="btn btn-danger"
           onClick={() => {
-            if (window.confirm("Clear every habit, log, and setting in PUTI Tracker?")) {
+            if (window.confirm("Clear every habit, log, and setting in Tracker?")) {
               resetAll();
               setMessage("All data cleared.");
             }
@@ -271,7 +271,7 @@ function TimerHost() {
   const left = useTracker((state) => state.timer.leftSec);
 
   useEffect(() => {
-    document.title = status === "running" ? `${formatClock(left)} · PUTI Tracker` : "PUTI Tracker";
+    document.title = status === "running" ? `${formatClock(left)} · Tracker` : "Tracker";
   }, [status, left]);
 
   useEffect(() => {

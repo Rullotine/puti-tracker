@@ -73,7 +73,7 @@ export function MatrixBoot() {
     <main className="relative grid min-h-dvh place-items-center overflow-hidden">
       <MatrixRain dense fade={0.22} className="absolute inset-0 h-full w-full" />
       <div className="relative z-10 text-center">
-        <p className="font-mono text-xs tracking-[0.35em] text-primary">BOOT // PUTI</p>
+        <p className="font-mono text-xs tracking-[0.35em] text-primary">BOOT // TRACKER</p>
         <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight">puti tracker</h1>
         <p className="mt-2 text-sm text-muted">built by ks2v</p>
       </div>
