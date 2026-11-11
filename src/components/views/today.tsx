@@ -26,6 +26,11 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
   const focusMinutes = useTracker((state) => state.focusMinutes);
   const goalHours = useTracker((state) => state.goalHours);
   const displayName = useTracker((state) => state.displayName);
+  const steps = useTracker((state) => state.steps);
+  const stepGoal = useTracker((state) => state.stepGoal);
+  const setSteps = useTracker((state) => state.setSteps);
+  const setStepGoal = useTracker((state) => state.setStepGoal);
+  const todaySteps = steps[today] ?? 0;
   const notes = useTracker((state) => state.notes);
   const nutrientLogs = useTracker((state) => state.nutrientLogs);
   const filled = NUTRIENTS.filter((item) => nutrientLogs[today]?.[item.id] != null).length;
@@ -51,10 +56,46 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
     { id: "calories", label: "Calories", value: `${eaten}`, hint: `of ${calorieGoal} kcal` },
     { id: "nutrients", label: "Nutrients", value: `${filled}/${NUTRIENTS.length}`, hint: "logged today" },
     { id: "notes", label: "Notes", value: String(notes.length), hint: "saved" },
-  ];
+      ];
 
   return (
     <div className="flex flex-col gap-4">
+      <Panel title="Steps">
+        <p className="font-display text-3xl font-semibold tabular-nums">
+          {todaySteps.toLocaleString()}
+          <span className="text-lg text-muted"> / {stepGoal.toLocaleString()}</span>
+        </p>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, stepGoal ? (todaySteps / stepGoal) * 100 : 0)}%` }} />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {[1000, 2000, 5000].map((n) => (
+            <button key={n} type="button" className="btn btn-ghost h-9 px-3 text-sm" onClick={() => setSteps(today, todaySteps + n)}>
+              +{n // 1000}k
+            </button>
+          ))}
+          <input
+            className="field w-28"
+            type="number"
+            min={0}
+            value={todaySteps}
+            onChange={(e) => setSteps(today, Number(e.target.value) || 0)}
+            aria-label="Steps today"
+          />
+          <label className="flex items-center gap-2 text-xs text-muted">
+            Goal
+            <input
+              className="field w-24"
+              type="number"
+              min={1000}
+              step={500}
+              value={stepGoal}
+              onChange={(e) => setStepGoal(Number(e.target.value) || 8000)}
+            />
+          </label>
+        </div>
+      </Panel>
+
       <header className="flex items-center gap-3">
         <div className="grid h-12 w-12 place-items-center rounded-full bg-primary font-display text-sm font-semibold text-on-primary">
           {initials(displayName)}

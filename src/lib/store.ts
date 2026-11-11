@@ -4,7 +4,7 @@ import { parseSnapshot } from "@/lib/backup";
 import { todayISO, uid } from "@/lib/dates";
 import { defaultNotify, defaultTargets } from "@/lib/nutrients";
 import { buildSample } from "@/lib/sample";
-import type { Alarm, Food, Habit, Meal, Med, Note, NoticeKind, SleepNight, Snapshot, Task, TimerState } from "@/lib/types";
+import type { Alarm, Food, Habit, JournalEntry, LiftLog, LiftPlan, LiftSet, Meal, Med, Note, NoticeKind, SleepNight, Snapshot, SoundPrefs, Task, TimerState } from "@/lib/types";
 import { clamp } from "@/lib/utils";
 
 const DEFAULT_TIMER: TimerState = { status: "idle", totalSec: 25 * 60, leftSec: 25 * 60, endsAt: null };
@@ -53,7 +53,7 @@ type Tracker = Snapshot & {
   setTarget: (id: string, value: number) => void;
   setNutrient: (date: string, id: string, value: number | null) => void;
   addAlarm: (input: { label: string; time: string }) => void;
-  updateAlarm: (id: string, patch: Partial<Pick<Alarm, "label" | "time" | "enabled" | "days">>) => void;
+  updateAlarm: (id: string, patch: Partial<Pick<Alarm, "label" | "time" | "enabled" | "days" | "tone">>) => void;
   removeAlarm: (id: string) => void;
   markAlarmFired: (id: string, day: string) => void;
   snoozeAlarm: (id: string) => void;
@@ -64,6 +64,15 @@ type Tracker = Snapshot & {
   clearNotices: () => void;
   setNotify: (patch: Partial<Snapshot["notify"]>) => void;
   markFired: (key: string, day: string) => void;
+  setSteps: (date: string, count: number) => void;
+  setStepGoal: (goal: number) => void;
+  setSounds: (patch: Partial<SoundPrefs>) => void;
+  addLift: (input: { date: string; exercise: string; sets: Omit<LiftSet, "id">[]; note?: string }) => void;
+  removeLift: (id: string) => void;
+  addLiftPlan: (exercise: string, weekday: number) => void;
+  removeLiftPlan: (id: string) => void;
+  saveJournal: (date: string, mood: number, body: string) => void;
+  removeJournal: (id: string) => void;
 };
 
 const emptySnapshot = (): Snapshot => ({
@@ -87,6 +96,12 @@ const emptySnapshot = (): Snapshot => ({
   notices: [],
   notify: defaultNotify(),
   fired: {},
+  steps: {},
+  stepGoal: 8000,
+  lifts: [],
+  liftPlans: [],
+  journal: [],
+  sounds: { clicks: true, clickVolume: 0.3 },
 });
 
 function addMinutes(map: Record<string, number>, date: string, mins: number) {
@@ -149,6 +164,12 @@ export const useTracker = create<Tracker>()(
           notices: state.notices,
           notify: state.notify,
           fired: state.fired,
+          steps: state.steps,
+          stepGoal: state.stepGoal,
+          lifts: state.lifts,
+          liftPlans: state.liftPlans,
+          journal: state.journal,
+          sounds: state.sounds,
         };
       },
       setDisplayName: (name) => {
@@ -427,6 +448,61 @@ export const useTracker = create<Tracker>()(
       markRead: (id) => set((state) => ({ notices: state.notices.map((notice) => (notice.id === id ? { ...notice, read: true } : notice)) })),
       markAllRead: () => set((state) => ({ notices: state.notices.map((notice) => ({ ...notice, read: true })) })),
       clearNotices: () => set({ notices: [], ringingId: null }),
+      setSteps: (date, count) =>
+        set((state) => ({
+          steps: { ...state.steps, [date]: clamp(Math.round(count), 0, 200000) },
+        })),
+      setStepGoal: (goal) => set({ stepGoal: clamp(Math.round(goal), 1000, 50000) }),
+      setSounds: (patch) => set((state) => ({ sounds: { ...state.sounds, ...patch } })),
+      addLift: (input) => {
+        const exercise = input.exercise.trim().slice(0, 60);
+        if (!exercise || input.sets.length === 0) return;
+        const log = {
+          id: uid(),
+          date: input.date,
+          exercise,
+          sets: input.sets.map((s) => ({
+            id: uid(),
+            reps: clamp(Math.round(s.reps), 1, 100),
+            weight: clamp(s.weight, 0, 2000),
+            feel: clamp(Math.round(s.feel), 1, 5),
+          })),
+          note: (input.note ?? "").trim().slice(0, 200),
+        };
+        set((state) => ({ lifts: [log, ...state.lifts].slice(0, 400) }));
+      },
+      removeLift: (id) => set((state) => ({ lifts: state.lifts.filter((l) => l.id !== id) })),
+      addLiftPlan: (exercise, weekday) => {
+        const name = exercise.trim().slice(0, 60);
+        if (!name) return;
+        const plan = { id: uid(), exercise: name, weekday: clamp(Math.round(weekday), 0, 6) };
+        set((state) => ({ liftPlans: [...state.liftPlans, plan].slice(0, 40) }));
+      },
+      removeLiftPlan: (id) => set((state) => ({ liftPlans: state.liftPlans.filter((p) => p.id !== id) })),
+      saveJournal: (date, mood, body) => {
+        const cleaned = body.trim().slice(0, 2000);
+        set((state) => {
+          const existing = state.journal.find((j) => j.date === date);
+          if (existing) {
+            return {
+              journal: state.journal.map((j) =>
+                j.date === date
+                  ? { ...j, mood: clamp(Math.round(mood), 1, 5), body: cleaned, updated: new Date().toISOString() }
+                  : j,
+              ),
+            };
+          }
+          const entry = {
+            id: uid(),
+            date,
+            mood: clamp(Math.round(mood), 1, 5),
+            body: cleaned,
+            updated: new Date().toISOString(),
+          };
+          return { journal: [entry, ...state.journal].slice(0, 200) };
+        });
+      },
+      removeJournal: (id) => set((state) => ({ journal: state.journal.filter((j) => j.id !== id) })),
       setNotify: (patch) => set((state) => ({ notify: { ...state.notify, ...patch } })),
       markFired: (key, day) => set((state) => ({ fired: { ...state.fired, [key]: day } })),
     }),
@@ -456,6 +532,12 @@ export const useTracker = create<Tracker>()(
         theme: state.theme,
         sample: state.sample,
         timer: state.timer,
+        steps: state.steps,
+        stepGoal: state.stepGoal,
+        lifts: state.lifts,
+        liftPlans: state.liftPlans,
+        journal: state.journal,
+        sounds: state.sounds,
       }),
     },
   ),

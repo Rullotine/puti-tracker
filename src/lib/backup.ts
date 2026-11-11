@@ -1,5 +1,10 @@
 import { defaultNotify, defaultTargets, NUTRIENTS } from "@/lib/nutrients";
-import type { Alarm, Food, Habit, Meal, Med, MedMark, Note, Notice, NoticeKind, SleepNight, Snapshot, Task } from "@/lib/types";
+import type { Alarm, AlarmTone, Food, Habit, JournalEntry, LiftLog, LiftPlan, Meal, Med, MedMark, Note, Notice, NoticeKind, SleepNight, Snapshot, Task } from "@/lib/types";
+
+function cryptoRandom() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+}
+
 import { clamp } from "@/lib/utils";
 
 const MEAL_SET = new Set<Meal>(["breakfast", "lunch", "dinner", "snack"]);
@@ -223,6 +228,87 @@ export function parseSnapshot(raw: unknown): Snapshot {
     if (typeof value === "string") fired[key.slice(0, 40)] = value.slice(0, 10);
   }
 
+
+  const steps: Record<string, number> = {};
+  const stepsRaw = asRecord(root.steps) ?? {};
+  for (const [k, v] of Object.entries(stepsRaw)) {
+    if (typeof v === "number" && Number.isFinite(v)) steps[k.slice(0, 10)] = Math.max(0, Math.min(200000, Math.round(v)));
+  }
+  const stepGoal = typeof root.stepGoal === "number" && Number.isFinite(root.stepGoal)
+    ? Math.max(1000, Math.min(50000, Math.round(root.stepGoal)))
+    : 8000;
+
+  const lifts: LiftLog[] = [];
+  if (Array.isArray(root.lifts)) {
+    for (const raw of root.lifts.slice(0, 400)) {
+      const row = asRecord(raw);
+      if (!row) continue;
+      const exercise = typeof row.exercise === "string" ? row.exercise.trim().slice(0, 60) : "";
+      const date = typeof row.date === "string" ? row.date.slice(0, 10) : "";
+      if (!exercise || !date) continue;
+      const sets = [];
+      if (Array.isArray(row.sets)) {
+        for (const s of row.sets.slice(0, 20)) {
+          const sr = asRecord(s);
+          if (!sr) continue;
+          const reps = typeof sr.reps === "number" ? Math.max(1, Math.min(100, Math.round(sr.reps))) : 0;
+          const weight = typeof sr.weight === "number" ? Math.max(0, Math.min(2000, sr.weight)) : 0;
+          const feel = typeof sr.feel === "number" ? Math.max(1, Math.min(5, Math.round(sr.feel))) : 3;
+          if (reps > 0) sets.push({ id: typeof sr.id === "string" ? sr.id.slice(0, 40) : cryptoRandom(), reps, weight, feel });
+        }
+      }
+      if (!sets.length) continue;
+      lifts.push({
+        id: typeof row.id === "string" ? row.id.slice(0, 40) : cryptoRandom(),
+        date,
+        exercise,
+        sets,
+        note: typeof row.note === "string" ? row.note.trim().slice(0, 200) : "",
+      });
+    }
+  }
+
+  const liftPlans: LiftPlan[] = [];
+  if (Array.isArray(root.liftPlans)) {
+    for (const raw of root.liftPlans.slice(0, 40)) {
+      const row = asRecord(raw);
+      if (!row) continue;
+      const exercise = typeof row.exercise === "string" ? row.exercise.trim().slice(0, 60) : "";
+      const weekday = typeof row.weekday === "number" ? Math.max(0, Math.min(6, Math.round(row.weekday))) : -1;
+      if (!exercise || weekday < 0) continue;
+      liftPlans.push({
+        id: typeof row.id === "string" ? row.id.slice(0, 40) : cryptoRandom(),
+        exercise,
+        weekday,
+      });
+    }
+  }
+
+  const journal: JournalEntry[] = [];
+  if (Array.isArray(root.journal)) {
+    for (const raw of root.journal.slice(0, 200)) {
+      const row = asRecord(raw);
+      if (!row) continue;
+      const date = typeof row.date === "string" ? row.date.slice(0, 10) : "";
+      if (!date) continue;
+      journal.push({
+        id: typeof row.id === "string" ? row.id.slice(0, 40) : cryptoRandom(),
+        date,
+        mood: typeof row.mood === "number" ? Math.max(1, Math.min(5, Math.round(row.mood))) : 3,
+        body: typeof row.body === "string" ? row.body.trim().slice(0, 2000) : "",
+        updated: typeof row.updated === "string" ? row.updated.slice(0, 40) : date,
+      });
+    }
+  }
+
+  const soundsRaw = asRecord(root.sounds) ?? {};
+  const sounds = {
+    clicks: soundsRaw.clicks !== false,
+    clickVolume: typeof soundsRaw.clickVolume === "number"
+      ? Math.max(0, Math.min(1, soundsRaw.clickVolume))
+      : 0.3,
+  };
+
   return {
     version: 1,
     displayName: typeof root.displayName === "string" ? root.displayName.trim().slice(0, 32) : "",
@@ -244,5 +330,11 @@ export function parseSnapshot(raw: unknown): Snapshot {
     notices: notices.slice(0, 80),
     notify,
     fired,
+    steps,
+    stepGoal,
+    lifts,
+    liftPlans,
+    journal,
+    sounds,
   };
 }

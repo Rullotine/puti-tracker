@@ -16,6 +16,7 @@ export type Theme = {
 };
 
 export const THEMES: Theme[] = [
+  { id: "void", name: "Void black", mode: "dark", bg: "#050508", ink: "#0a0a10", surface: "#12121a", fg: "#e8e8f0", muted: "#8b8b9a", primary: "#a78bfa", deep: "#7c3aed", on: "#1a1030", line: "#2a2a38" },
   { id: "clinic", name: "Night clinic", mode: "dark", bg: "#071018", ink: "#0c1822", surface: "#122331", fg: "#e8f6f4", muted: "#93b0b4", primary: "#3ee0c3", deep: "#2ed4b0", on: "#04241d", line: "#23404a" },
   { id: "matrix", name: "Matrix", mode: "dark", bg: "#020805", ink: "#03110a", surface: "#071a10", fg: "#c8ffd4", muted: "#6fbf86", primary: "#39ff14", deep: "#18c000", on: "#031406", line: "#14532d" },
   { id: "amber", name: "Amber term", mode: "dark", bg: "#140e06", ink: "#1c1408", surface: "#2a1c0c", fg: "#f8e7c2", muted: "#c4a574", primary: "#ffbf47", deep: "#e09a1a", on: "#2a1a04", line: "#5c4318" },

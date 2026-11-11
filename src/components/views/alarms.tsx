@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Panel } from "@/components/ui";
+import { ALARM_TONES, type AlarmTone } from "@/lib/types";
+import { playTone } from "@/lib/sounds";
 import { useTracker } from "@/lib/store";
 import { WEEKDAYS } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -64,6 +66,22 @@ export function AlarmsView() {
                 </button>
               );
             })}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted">Tone</span>
+            {ALARM_TONES.map((tone) => (
+              <button
+                key={tone.id}
+                type="button"
+                className={cn("btn h-9 px-3 text-xs", (alarm.tone ?? "chime") === tone.id ? "btn-primary" : "btn-ghost")}
+                onClick={() => {
+                  updateAlarm(alarm.id, { tone: tone.id as AlarmTone });
+                  playTone(tone.id);
+                }}
+              >
+                {tone.label}
+              </button>
+            ))}
           </div>
           {alarm.armAt ? <p className="text-sm text-muted">Snoozed. It will ring again shortly.</p> : null}
         </article>

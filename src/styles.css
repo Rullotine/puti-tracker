@@ -207,3 +207,20 @@
     transition: none;
   }
 }
+
+
+/* Soft ambient drift for void / dark desks */
+@keyframes void-drift {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+
+html[data-theme="void"] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 20%, color-mix(in oklab, var(--color-primary) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 80% 70%, color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 50%),
+    linear-gradient(160deg, #050508, #0c0c14 45%, #080810);
+  background-size: 140% 140%, 140% 140%, 100% 100%;
+  animation: void-drift 28s ease-in-out infinite;
+}

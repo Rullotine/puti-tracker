@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "puti tracker";
+const APP_NAME = "PUTI Tracker";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -11,7 +11,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
-      { name: "description", content: "puti tracker by ks2v — habits, sleep, medicine, focus, and calories." },
+      { name: "description", content: "PUTI Tracker by ks2v — habits, lifts, focus, journal, and more." },
       { name: "theme-color", content: "#071018" },
     ],
     links: [

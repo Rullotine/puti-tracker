@@ -8,6 +8,8 @@ import { AlarmsView } from "@/components/views/alarms";
 import { AlertsView } from "@/components/views/alerts";
 import { CaloriesView } from "@/components/views/calories";
 import { FocusView } from "@/components/views/focus";
+import { JournalView } from "@/components/views/journal";
+import { LiftsView } from "@/components/views/lifts";
 import { HabitsView } from "@/components/views/habits";
 import { InsightsView } from "@/components/views/insights";
 import { MedicineView } from "@/components/views/medicine";
@@ -19,6 +21,7 @@ import { TodayView } from "@/components/views/today";
 import { formatClock } from "@/lib/dates";
 import { useTracker } from "@/lib/store";
 import { applyTheme } from "@/lib/themes";
+import { playClick } from "@/lib/sounds";
 import { cn } from "@/lib/utils";
 
 export function AppShell() {
@@ -82,9 +85,11 @@ export function AppShell() {
           {view === "sleep" ? <SleepView /> : null}
           {view === "medicine" ? <MedicineView /> : null}
           {view === "focus" ? <FocusView /> : null}
+          {view === "lifts" ? <LiftsView /> : null}
           {view === "calories" ? <CaloriesView /> : null}
           {view === "nutrients" ? <NutrientsView /> : null}
           {view === "notes" ? <NotesView /> : null}
+          {view === "journal" ? <JournalView /> : null}
           {view === "alarms" ? <AlarmsView /> : null}
           {view === "alerts" ? <AlertsView /> : null}
           {view === "insights" ? <InsightsView /> : null}
@@ -116,7 +121,7 @@ function Brand({ onAlerts }: { onAlerts: () => void }) {
   return (
     <div className="flex items-start justify-between gap-2">
       <div>
-        <p className="font-display text-xl font-semibold tracking-tight">puti tracker</p>
+        <p className="font-display text-xl font-semibold tracking-tight">PUTI Tracker</p>
         <p className="text-xs text-muted">by ks2v</p>
       </div>
       <button type="button" className="btn btn-ghost relative h-11 w-11 px-0" aria-label="Alerts" onClick={onAlerts}>
@@ -133,13 +138,18 @@ function Brand({ onAlerts }: { onAlerts: () => void }) {
 
 function NavButton({ id, current, onSelect }: { id: ViewId; current: ViewId; onSelect: (id: ViewId) => void }) {
   const item = VIEWS.find((entry) => entry.id === id);
+  const clicks = useTracker((s) => s.sounds?.clicks ?? true);
+  const clickVolume = useTracker((s) => s.sounds?.clickVolume ?? 0.3);
   if (!item) return null;
   const Icon = item.icon;
   const on = current === id;
   return (
     <button
       type="button"
-      onClick={() => onSelect(id)}
+      onClick={() => {
+        if (clicks) playClick(clickVolume);
+        onSelect(id);
+      }}
       aria-current={on ? "page" : undefined}
       className={cn(
         "flex h-11 shrink-0 items-center gap-2 rounded-full px-3 text-sm font-semibold",
@@ -197,7 +207,7 @@ function DataTools() {
 
   return (
     <section className="mt-4 border-t border-line pt-4">
-      <p className="text-sm text-muted">Data stays in this browser. Export a backup before you switch devices. puti tracker · ks2v</p>
+      <p className="text-sm text-muted">Data stays in this browser. Export a backup before you switch devices. PUTI Tracker · ks2v</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
@@ -207,7 +217,7 @@ function DataTools() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = "puti-tracker-ks2v.json";
+            link.download = "PUTI-Tracker-backup.json";
             link.click();
             URL.revokeObjectURL(url);
             setMessage("Backup downloaded.");
@@ -223,7 +233,7 @@ function DataTools() {
           type="button"
           className="btn btn-danger"
           onClick={() => {
-            if (window.confirm("Clear every habit, log, and setting in puti tracker?")) {
+            if (window.confirm("Clear every habit, log, and setting in PUTI Tracker?")) {
               resetAll();
               setMessage("All data cleared.");
             }
@@ -261,7 +271,7 @@ function TimerHost() {
   const left = useTracker((state) => state.timer.leftSec);
 
   useEffect(() => {
-    document.title = status === "running" ? `${formatClock(left)} · puti tracker` : "puti tracker";
+    document.title = status === "running" ? `${formatClock(left)} · PUTI Tracker` : "PUTI Tracker";
   }, [status, left]);
 
   useEffect(() => {

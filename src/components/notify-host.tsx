@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { todayISO } from "@/lib/dates";
 import { NUTRIENTS } from "@/lib/nutrients";
 import { useTracker } from "@/lib/store";
+import { playTone } from "@/lib/sounds";
 
 function minutes(value: string) {
   const [h, m] = value.split(":").map(Number);
@@ -42,7 +43,11 @@ export function NotifyHost() {
     }
     if (!top || top.id === seen.current) return;
     seen.current = top.id;
-    if (sound && top.kind === "alarm") beep();
+    if (sound && top.kind === "alarm") {
+        const ringing = useTracker.getState().ringingId;
+        const tone = useTracker.getState().alarms.find((a) => a.id === ringing)?.tone ?? "chime";
+        playTone(tone);
+      } else if (sound) beep();
     if (browser && typeof Notification !== "undefined" && Notification.permission === "granted") {
       new Notification(top.title, { body: top.body });
     }
