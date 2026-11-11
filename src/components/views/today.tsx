@@ -56,7 +56,7 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
     { id: "calories", label: "Calories", value: `${eaten}`, hint: `of ${calorieGoal} kcal` },
     { id: "nutrients", label: "Nutrients", value: `${filled}/${NUTRIENTS.length}`, hint: "logged today" },
     { id: "notes", label: "Notes", value: String(notes.length), hint: "saved" },
-  ];
+      ];
 
   return (
     <div className="flex flex-col gap-4">

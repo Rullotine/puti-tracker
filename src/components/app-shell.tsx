@@ -18,6 +18,7 @@ import { NutrientsView } from "@/components/views/nutrients";
 import { SleepView } from "@/components/views/sleep";
 import { ThemesView } from "@/components/views/themes";
 import { TodayView } from "@/components/views/today";
+import { startCloudSync } from "@/lib/cloud/sync";
 import { formatClock } from "@/lib/dates";
 import { useTracker } from "@/lib/store";
 import { applyTheme } from "@/lib/themes";
@@ -42,6 +43,7 @@ export function AppShell() {
         else if (state.timer.status === "running" && state.timer.endsAt != null && state.timer.endsAt <= Date.now()) {
           state.completeSession();
         }
+        startCloudSync();
         await boot;
       } finally {
         if (live) setReady(true);
