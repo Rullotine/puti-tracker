@@ -56,7 +56,7 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
     { id: "calories", label: "Calories", value: `${eaten}`, hint: `of ${calorieGoal} kcal` },
     { id: "nutrients", label: "Nutrients", value: `${filled}/${NUTRIENTS.length}`, hint: "logged today" },
     { id: "notes", label: "Notes", value: String(notes.length), hint: "saved" },
-      ];
+  ];
 
   return (
     <div className="flex flex-col gap-4">
@@ -71,7 +71,7 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
         <div className="mt-3 flex flex-wrap gap-2">
           {[1000, 2000, 5000].map((n) => (
             <button key={n} type="button" className="btn btn-ghost h-9 px-3 text-sm" onClick={() => setSteps(today, todaySteps + n)}>
-              +{n // 1000}k
+              +{Math.floor(n / 1000)}k
             </button>
           ))}
           <input
