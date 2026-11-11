@@ -7,7 +7,7 @@ import { t as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-CTGXwAYz.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-OeU4FdOx.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -3295,10 +3295,9 @@ function StreakBoard({ large = false }) {
 var cafe_default = "/assets/cafe-PJqpZ0_V.mp3";
 var campfire_default = "/assets/campfire-DfkYub-i.mp3";
 var forest_default = "/assets/forest-CDjwgAsi.mp3";
-var lofi_default = "/assets/lofi-BhLlnrlk.mp3";
-var pink_default = "/assets/pink-7LxP40qU.mp3";
-var rain_default = "/assets/rain-Bs3kxflz.mp3";
-var vinyl_default = "/assets/vinyl-C0bQg-Ml.mp3";
+var lofi_default = "/assets/lofi-DPif-Ubn.mp3";
+var rain_default = "/assets/rain-TiRw7Wbx.mp3";
+var vinyl_default = "/assets/vinyl-CPHBunLt.mp3";
 var waves_default = "/assets/waves-DKPKt3iX.mp3";
 var wind_default = "/assets/wind-DmCu4v1A.mp3";
 var AMBIENTS = [
@@ -3352,7 +3351,6 @@ var fileModules = /* #__PURE__ */ Object.assign({
 	"../assets/ambient/campfire.mp3": campfire_default,
 	"../assets/ambient/forest.mp3": forest_default,
 	"../assets/ambient/lofi.mp3": lofi_default,
-	"../assets/ambient/pink.mp3": pink_default,
 	"../assets/ambient/rain.mp3": rain_default,
 	"../assets/ambient/vinyl.mp3": vinyl_default,
 	"../assets/ambient/waves.mp3": waves_default,
