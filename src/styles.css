@@ -410,7 +410,8 @@ html[data-theme="mcclassic"] main header p {
 
 html[data-theme="cherry"] body,
 html[data-theme="lushcave"] body,
-html[data-theme="amethyst"] body {
+html[data-theme="amethyst"] body,
+html[data-theme="chuhahua"] body {
   background-image: none;
 }
 
@@ -419,20 +420,24 @@ html[data-theme="cherry"] body::after,
 html[data-theme="lushcave"] body::before,
 html[data-theme="lushcave"] body::after,
 html[data-theme="amethyst"] body::before,
-html[data-theme="amethyst"] body::after {
+html[data-theme="amethyst"] body::after,
+html[data-theme="chuhahua"] body::before,
+html[data-theme="chuhahua"] body::after {
   display: none;
 }
 
 html[data-theme="cherry"] .panel,
 html[data-theme="lushcave"] .panel,
-html[data-theme="amethyst"] .panel {
+html[data-theme="amethyst"] .panel,
+html[data-theme="chuhahua"] .panel {
   background: color-mix(in oklab, var(--color-surface) 84%, transparent);
   border: 1px solid color-mix(in oklab, var(--color-primary) 40%, transparent);
 }
 
 html[data-theme="cherry"] aside,
 html[data-theme="lushcave"] aside,
-html[data-theme="amethyst"] aside {
+html[data-theme="amethyst"] aside,
+html[data-theme="chuhahua"] aside {
   background: color-mix(in oklab, var(--color-surface) 88%, transparent);
 }
 
@@ -444,13 +449,16 @@ html[data-theme="cherry"] main header p {
 html[data-theme="lushcave"] main h1,
 html[data-theme="lushcave"] main header p,
 html[data-theme="amethyst"] main h1,
-html[data-theme="amethyst"] main header p {
+html[data-theme="amethyst"] main header p,
+html[data-theme="chuhahua"] main h1,
+html[data-theme="chuhahua"] main header p {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
 }
 
 .cg-scene { background: linear-gradient(180deg, #a9d8ff 0%, #cfe4ff 38%, #ffe3ee 74%, #ffeef4 100%); }
 .lc-scene { background: #030d0a; }
 .am-scene { background: #0e0620; }
+.ch-scene { background: linear-gradient(180deg, #12142e 0%, #2a2348 34%, #5c3a50 62%, #a05c44 82%, #c97b4a 100%); }
 
 /* shared motion used by several scenes */
 .sc-swim {
@@ -818,6 +826,173 @@ html[data-theme="amethyst"] main header p {
   100% { transform: scale(2.4); opacity: 0; }
 }
 
+
+/* --- Chuhahua: cozy cottage dusk --- */
+.ch-moon { background: #eef1ff; box-shadow: 0 0 0 8px rgba(238, 241, 255, 0.25), 0 0 60px 22px rgba(210, 220, 255, 0.35); }
+.ch-twinkle { animation: ch-twinkle 3s ease-in-out infinite alternate; }
+.ch-smoke { animation: ch-smoke 8s linear infinite; }
+.ch-window { animation: ch-window 2.7s ease-in-out infinite alternate; }
+.ch-halo { animation: ch-halo 3.4s ease-in-out infinite alternate; }
+
+.ch-book {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ch-book 3.2s ease-in-out infinite alternate;
+}
+
+.ch-page-l {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: ch-page 1.6s ease-in-out infinite alternate;
+}
+
+.ch-page-r {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: ch-page 1.6s ease-in-out infinite alternate;
+}
+
+.ch-glyph { animation: ch-glyph 6s ease-in-out infinite; }
+
+.ch-lid {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: ch-lid 12s ease-in-out infinite;
+}
+
+.ch-cache { animation: ch-cache 12s ease-in-out infinite; }
+.ch-glint { animation: ch-glint 2.8s ease-in-out infinite alternate; }
+
+.ch-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ch-sway 5.5s ease-in-out infinite alternate;
+}
+
+.ch-nibble {
+  transform-box: fill-box;
+  transform-origin: 20% 80%;
+  animation: ch-nibble 2.4s ease-in-out infinite;
+}
+
+.ch-look {
+  transform-box: fill-box;
+  transform-origin: 50% 80%;
+  animation: ch-look 9s ease-in-out infinite;
+}
+
+.ch-ear {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ch-ear 5s steps(1, end) infinite;
+}
+
+.ch-stalk {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ch-stalk 2.4s ease-in-out infinite;
+}
+
+.ch-firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffe9a0;
+  box-shadow: 0 0 8px 3px rgba(255, 220, 120, 0.55);
+  opacity: 0;
+  animation: ch-firefly ease-in-out infinite;
+}
+
+@keyframes ch-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+@keyframes ch-smoke {
+  0% { transform: translate(0, 0) scale(0.7); opacity: 0; }
+  12% { opacity: 0.55; }
+  100% { transform: translate(var(--sx, 8px), -34px) scale(1.5); opacity: 0; }
+}
+
+@keyframes ch-window {
+  from { opacity: 0.75; }
+  to { opacity: 1; }
+}
+
+@keyframes ch-halo {
+  from { opacity: 0.1; }
+  to { opacity: 0.26; }
+}
+
+@keyframes ch-book {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2.5px); }
+}
+
+@keyframes ch-page {
+  from { transform: scaleX(1) skewY(0deg); }
+  to { transform: scaleX(0.3) skewY(-6deg); }
+}
+
+@keyframes ch-glyph {
+  0% { transform: translate(0, 0); opacity: 0; }
+  18% { opacity: 0.95; }
+  100% { transform: translate(var(--gx, 6px), -26px); opacity: 0; }
+}
+
+@keyframes ch-lid {
+  0%, 68% { transform: rotate(0deg); }
+  74%, 86% { transform: rotate(-18deg); }
+  94%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes ch-cache {
+  0%, 70% { opacity: 0; }
+  76%, 84% { opacity: 1; }
+  92%, 100% { opacity: 0; }
+}
+
+@keyframes ch-glint {
+  from { opacity: 0.15; }
+  to { opacity: 0.6; }
+}
+
+@keyframes ch-sway {
+  from { transform: rotate(-1.6deg); }
+  to { transform: rotate(1.8deg); }
+}
+
+@keyframes ch-nibble {
+  0%, 100% { transform: rotate(0deg); }
+  20%, 30% { transform: rotate(9deg); }
+  45%, 55% { transform: rotate(9deg); }
+  70% { transform: rotate(0deg); }
+}
+
+@keyframes ch-look {
+  0%, 38%, 100% { transform: rotate(0deg); }
+  46%, 58% { transform: rotate(-7deg); }
+  66% { transform: rotate(4deg); }
+}
+
+@keyframes ch-ear {
+  0%, 88%, 100% { transform: translateY(0); }
+  90%, 94% { transform: translateY(-1px); }
+}
+
+@keyframes ch-stalk {
+  0%, 100% { transform: rotate(0deg); }
+  25%, 55% { transform: rotate(-7deg); }
+}
+
+@keyframes ch-firefly {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.9; }
+  50% { transform: translate(calc(var(--fx, 20px) * 0.5), -14px); opacity: 0.5; }
+  80% { opacity: 0.9; }
+  100% { transform: translate(var(--fx, 20px), 4px); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mc-anim { animation: none !important; }
   .mc-orb { display: none; }
@@ -827,5 +1002,8 @@ html[data-theme="amethyst"] main header p {
   .lc-spore,
   .lc-bubble,
   .am-mote,
-  .am-chime { display: none; }
+  .am-chime,
+  .ch-smoke,
+  .ch-glyph,
+  .ch-firefly { display: none; }
 }

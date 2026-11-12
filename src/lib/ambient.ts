@@ -25,10 +25,8 @@ const BUILTIN: { id: string; label: string }[] = [
   { id: "cafe", label: "Cafe" },
   { id: "forest", label: "Forest" },
   { id: "vinyl", label: "Vinyl crackle" },
-  { id: "storm", label: "Thunderstorm" },
   { id: "night", label: "Night crickets" },
   { id: "fan", label: "Fan" },
-  { id: "train", label: "Train ride" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -348,31 +346,6 @@ const BUFFERS: Record<string, (ctx: AudioContext) => AudioBuffer> = {
     }, { rms: 0.06, peak: 0.9 }),
 };
 
-BUFFERS.thunder = (ctx) =>
-  render(
-    ctx,
-    36,
-    2,
-    (d, _ch, sr, n) => {
-      const rolls = 4;
-      for (let k = 0; k < rolls; k++) {
-        const pos = Math.floor(((k + rand() * 0.6) / rolls) * n);
-        const len = Math.floor(between(2.5, 4.5) * sr);
-        const amp = between(0.6, 1);
-        let deep = 0;
-        let rough = 0;
-        for (let i = 0; i < len; i++) {
-          const t = i / len;
-          const env = Math.min(1, t / 0.08) * Math.exp(-3.2 * t);
-          deep += 0.02 * (rand() * 2 - 1 - deep);
-          rough += 0.12 * (rand() * 2 - 1 - rough);
-          d[(pos + i) % n] += (deep * 5 + rough * 0.7 * Math.exp(-6 * t)) * env * amp;
-        }
-      }
-    },
-    { rms: 0.1, peak: 0.9 },
-  );
-
 BUFFERS.crickets = (ctx) =>
   render(
     ctx,
@@ -398,32 +371,6 @@ BUFFERS.crickets = (ctx) =>
       }
     },
     { rms: 0.05, peak: 0.8 },
-  );
-
-// Rhythmic "da-dum, da-dum" of wheels over rail joints (16 joints = 8.8 s, seamless loop)
-BUFFERS.train = (ctx) =>
-  render(
-    ctx,
-    8.8,
-    2,
-    (d, ch, sr, n) => {
-      const period = 0.55;
-      const count = Math.round(n / sr / period);
-      for (let k = 0; k < count; k++) {
-        const base = Math.floor(k * period * sr);
-        for (let j = 0; j < 2; j++) {
-          const pos = base + Math.floor(j * 0.13 * sr) + (ch ? 40 : 0);
-          const amp = j === 0 ? 1 : 0.75;
-          burst(d, n, pos, 0.5 * amp, Math.floor(0.04 * sr), 0.35);
-          const len = Math.floor(0.14 * sr);
-          for (let i = 0; i < len; i++) {
-            const t = i / sr;
-            d[(pos + i) % n] += 0.5 * amp * Math.sin(2 * Math.PI * 85 * t) * Math.exp(-t * 28);
-          }
-        }
-      }
-    },
-    { rms: 0.1, peak: 0.9 },
   );
 
 function getBuffer(ctx: AudioContext, key: string): AudioBuffer {
@@ -614,17 +561,6 @@ const SYNTHS: Record<string, (r: Rig, mix: GainNode) => void> = {
     r.chain(r.src("white"), r.filter("highpass", 3500), r.gain(0.05), mix);
   },
 
-  // Heavy rain, gusty wind and rolling thunder
-  storm(r, mix) {
-    r.chain(r.src("white"), r.filter("highpass", 700), r.filter("lowpass", 8000), r.gain(0.22), mix);
-    r.chain(r.src("rainDrops", 1.1), r.filter("highpass", 250), r.gain(1.4), mix);
-    r.chain(r.src("brown"), r.filter("lowpass", 300), r.gain(0.3), mix);
-    r.chain(r.src("thunder"), r.gain(1.6), mix);
-    const gusts = r.gain(0.12);
-    r.chain(r.src("pink"), r.filter("bandpass", 500, 0.8), gusts, mix);
-    r.lfo(0.11, 0.08, gusts.gain);
-  },
-
   // Layers of crickets on a quiet night with a faint breeze
   night(r, mix) {
     r.chain(r.src("crickets"), r.gain(1.2), mix);
@@ -645,12 +581,6 @@ const SYNTHS: Record<string, (r: Rig, mix: GainNode) => void> = {
     r.chain(r.src("white"), r.filter("bandpass", 3500, 0.7), r.gain(0.04), mix);
   },
 
-  // Wheels over rail joints with a low carriage rumble
-  train(r, mix) {
-    r.chain(r.src("train"), r.gain(1), mix);
-    r.chain(r.src("brown"), r.filter("lowpass", 220), r.gain(0.45), mix);
-    r.chain(r.src("white"), r.filter("highpass", 2500), r.gain(0.05), mix);
-  },
 };
 
 /** Per-sound loudness leveling so switching sounds doesn't jump in volume. */
@@ -665,10 +595,8 @@ const TRIM: Record<string, number> = {
   cafe: 1.2,
   forest: 1.3,
   vinyl: 1.0,
-  storm: 1.1,
   night: 1.2,
   fan: 1.1,
-  train: 1.1,
 };
 
 /* ------------------------------------------------------------------ */

@@ -11,6 +11,7 @@ const TAGS: Record<string, string> = {
   cherry: "animated",
   lushcave: "animated",
   amethyst: "animated",
+  chuhahua: "animated",
 };
 
 export function ThemesView() {
@@ -33,7 +34,7 @@ export function ThemesView() {
       <header>
         <h1 className="font-display text-2xl font-semibold">Themes</h1>
         <p className="mt-1 text-sm text-muted">
-          {THEMES.length} desks, {lights.length} light · animated scenes on 8bit Classic, Cherry grove, Lush cave and Amethyst room
+          {THEMES.length} desks, {lights.length} light · animated scenes on 8bit Classic, Cherry grove, Lush cave, Amethyst room and Chuhahua
         </p>
       </header>
       <Panel title="Your name">

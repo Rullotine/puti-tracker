@@ -14,7 +14,7 @@ export type Theme = {
   on: string;
   line: string;
   /** Optional special background treatment (css class or pattern) */
-  special?: "mcclassic" | "cherry" | "lushcave" | "amethyst";
+  special?: "mcclassic" | "cherry" | "lushcave" | "amethyst" | "chuhahua";
 };
 
 export const THEMES: Theme[] = [
@@ -44,6 +44,7 @@ export const THEMES: Theme[] = [
   { id: "cherry", name: "Cherry grove", mode: "light", bg: "#ffe3ee", ink: "#ffd3e4", surface: "#fff3f8", fg: "#43192f", muted: "#8c4c68", primary: "#b8336f", deep: "#96255a", on: "#fff5fa", line: "#f3b4cf", special: "cherry" },
   { id: "lushcave", name: "Lush cave", mode: "dark", bg: "#04110d", ink: "#071a14", surface: "#0b2a22", fg: "#dcf7e6", muted: "#86bfa0", primary: "#58e0a8", deep: "#2fb683", on: "#04221a", line: "#1c5a48", special: "lushcave" },
   { id: "amethyst", name: "Amethyst room", mode: "dark", bg: "#120824", ink: "#1a0d33", surface: "#26144a", fg: "#f3e9ff", muted: "#bba6e0", primary: "#c99bff", deep: "#a566f0", on: "#1d0b3a", line: "#4b2d80", special: "amethyst" },
+  { id: "chuhahua", name: "Chuhahua", mode: "dark", bg: "#0f0a06", ink: "#171008", surface: "#241812", fg: "#f7e9d2", muted: "#c8a478", primary: "#ffb454", deep: "#e0862e", on: "#2b1704", line: "#4c3520", special: "chuhahua" },
 
   // --- Feminine pink ---
   { id: "rose", name: "Rose", mode: "light", bg: "#fdf2f8", ink: "#fce7f3", surface: "#ffffff", fg: "#500724", muted: "#9d174d", primary: "#f472b6", deep: "#e11d8a", on: "#fdf2f8", line: "#fbcfe8" },
@@ -67,6 +68,7 @@ export const THEME_BADGES: Record<string, string> = {
   cherry: "mystique",
   lushcave: "mystique",
   amethyst: "mystique",
+  chuhahua: "author",
   barbie: "solid",
 };
 

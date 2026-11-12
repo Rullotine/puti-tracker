@@ -42,7 +42,9 @@ export function AppShell() {
         const raw = localStorage.getItem("puti-tracker");
         await useTracker.persist.rehydrate();
         const state = useTracker.getState();
-        applyTheme(state.theme || "clinic");
+        // v5: crimson is the default for everyone — migrate anyone still on the old default.
+        if (!state.theme || state.theme === "clinic") state.setTheme("crimson");
+        applyTheme(useTracker.getState().theme || "crimson");
         if (!raw) state.loadSample();
         else if (state.timer.status === "running" && state.timer.endsAt != null && state.timer.endsAt <= Date.now()) {
           state.completeSession();
@@ -140,7 +142,7 @@ function ClickSoundHost() {
 function ThemeSync() {
   const theme = useTracker((state) => state.theme);
   useEffect(() => {
-    applyTheme(theme || "clinic");
+    applyTheme(theme || "crimson");
   }, [theme]);
   return null;
 }

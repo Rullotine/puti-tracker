@@ -81,7 +81,7 @@ type Tracker = Snapshot & {
 const emptySnapshot = (): Snapshot => ({
   version: 1,
   displayName: "",
-  theme: "clinic",
+  theme: "crimson",
   habits: [],
   checks: {},
   sleep: [],
