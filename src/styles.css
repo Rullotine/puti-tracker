@@ -458,7 +458,7 @@ html[data-theme="chuhahua"] main header p {
 .cg-scene { background: linear-gradient(180deg, #a9d8ff 0%, #cfe4ff 38%, #ffe3ee 74%, #ffeef4 100%); }
 .lc-scene { background: #030d0a; }
 .am-scene { background: #0e0620; }
-.ch-scene { background: linear-gradient(180deg, #12142e 0%, #2a2348 34%, #5c3a50 62%, #a05c44 82%, #c97b4a 100%); }
+.ch-scene { background: linear-gradient(180deg, #060814 0%, #0e1230 30%, #232048 55%, #3c2c50 74%, #5c3a50 88%, #7a4a44 100%); }
 
 /* shared motion used by several scenes */
 .sc-swim {
@@ -827,8 +827,8 @@ html[data-theme="chuhahua"] main header p {
 }
 
 
-/* --- Chuhahua: cozy cottage dusk --- */
-.ch-moon { background: #eef1ff; box-shadow: 0 0 0 8px rgba(238, 241, 255, 0.25), 0 0 60px 22px rgba(210, 220, 255, 0.35); }
+/* --- Chuhahua: cozy homestead night --- */
+.ch-moon { background: #f4f6ff; box-shadow: 0 0 0 8px rgba(238, 241, 255, 0.22), 0 0 70px 26px rgba(200, 214, 255, 0.4); }
 .ch-twinkle { animation: ch-twinkle 3s ease-in-out infinite alternate; }
 .ch-smoke { animation: ch-smoke 8s linear infinite; }
 .ch-window { animation: ch-window 2.7s ease-in-out infinite alternate; }
@@ -872,25 +872,13 @@ html[data-theme="chuhahua"] main header p {
 .ch-nibble {
   transform-box: fill-box;
   transform-origin: 20% 80%;
-  animation: ch-nibble 2.4s ease-in-out infinite;
+  animation: ch-nibble 2.2s ease-in-out infinite;
 }
 
 .ch-look {
   transform-box: fill-box;
   transform-origin: 50% 80%;
   animation: ch-look 9s ease-in-out infinite;
-}
-
-.ch-ear {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: ch-ear 5s steps(1, end) infinite;
-}
-
-.ch-stalk {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: ch-stalk 2.4s ease-in-out infinite;
 }
 
 .ch-firefly {
@@ -901,6 +889,43 @@ html[data-theme="chuhahua"] main header p {
   box-shadow: 0 0 8px 3px rgba(255, 220, 120, 0.55);
   opacity: 0;
   animation: ch-firefly ease-in-out infinite;
+}
+
+/* roaming panda walk cycle */
+.ch-leg-a,
+.ch-leg-b {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: ch-leg 0.36s ease-in-out infinite alternate;
+}
+
+/* nametag counter-flip so text never mirrors */
+.ch-tag {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ch-tag 30s ease-in-out infinite;
+}
+
+.ch-shimmer { animation: ch-shimmer 4s ease-in-out infinite alternate; }
+.ch-fish { animation: ch-fish 13s ease-in-out infinite; }
+.ch-jack { animation: ch-jack 1.7s ease-in-out infinite alternate; }
+
+.ch-moth {
+  transform-box: fill-box;
+  transform-origin: -7px 2px;
+  animation: ch-moth 5s linear infinite;
+}
+
+.ch-shoot {
+  position: absolute;
+  top: 12%;
+  left: 0;
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f4f7ff);
+  box-shadow: 0 0 6px 1px rgba(244, 247, 255, 0.5);
+  opacity: 0;
+  animation: ch-shoot 22s linear infinite;
 }
 
 @keyframes ch-twinkle {
@@ -964,8 +989,8 @@ html[data-theme="chuhahua"] main header p {
 
 @keyframes ch-nibble {
   0%, 100% { transform: rotate(0deg); }
-  20%, 30% { transform: rotate(9deg); }
-  45%, 55% { transform: rotate(9deg); }
+  20%, 30% { transform: rotate(8deg); }
+  45%, 55% { transform: rotate(8deg); }
   70% { transform: rotate(0deg); }
 }
 
@@ -975,14 +1000,45 @@ html[data-theme="chuhahua"] main header p {
   66% { transform: rotate(4deg); }
 }
 
-@keyframes ch-ear {
-  0%, 88%, 100% { transform: translateY(0); }
-  90%, 94% { transform: translateY(-1px); }
+@keyframes ch-leg {
+  from { transform: rotate(-16deg); }
+  to { transform: rotate(16deg); }
 }
 
-@keyframes ch-stalk {
-  0%, 100% { transform: rotate(0deg); }
-  25%, 55% { transform: rotate(-7deg); }
+@keyframes ch-tag {
+  0%, 47% { transform: scaleX(1); }
+  50%, 97% { transform: scaleX(-1); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes ch-shimmer {
+  from { opacity: 0.5; transform: translateX(-1px); }
+  to { opacity: 1; transform: translateX(1px); }
+}
+
+@keyframes ch-fish {
+  0%, 72% { transform: translate(0, 0); opacity: 0; }
+  74% { opacity: 1; }
+  78% { transform: translate(3px, -9px); opacity: 1; }
+  82% { transform: translate(6px, 0); opacity: 0; }
+  100% { transform: translate(6px, 0); opacity: 0; }
+}
+
+@keyframes ch-jack {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+@keyframes ch-moth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ch-shoot {
+  0%, 78% { transform: translate(-12vw, 0) rotate(18deg); opacity: 0; }
+  80% { opacity: 1; }
+  88% { transform: translate(112vw, 26vh) rotate(18deg); opacity: 0; }
+  100% { transform: translate(112vw, 26vh) rotate(18deg); opacity: 0; }
 }
 
 @keyframes ch-firefly {
@@ -1005,5 +1061,8 @@ html[data-theme="chuhahua"] main header p {
   .am-chime,
   .ch-smoke,
   .ch-glyph,
-  .ch-firefly { display: none; }
+  .ch-firefly,
+  .ch-shoot,
+  .ch-fish,
+  .ch-moth { display: none; }
 }
