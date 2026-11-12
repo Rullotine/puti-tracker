@@ -1,4 +1,5 @@
 import { defaultNotify, defaultTargets, NUTRIENTS } from "@/lib/nutrients";
+import { isClickStyle } from "@/lib/sounds";
 import type { Alarm, AlarmTone, Food, Habit, JournalEntry, LiftLog, LiftPlan, Meal, Med, MedMark, Note, Notice, NoticeKind, SleepNight, Snapshot, Task } from "@/lib/types";
 
 function cryptoRandom() {
@@ -306,7 +307,9 @@ export function parseSnapshot(raw: unknown): Snapshot {
     clicks: soundsRaw.clicks !== false,
     clickVolume: typeof soundsRaw.clickVolume === "number"
       ? Math.max(0, Math.min(1, soundsRaw.clickVolume))
-      : 0.3,
+      : 0.6,
+    clickStyle: isClickStyle(soundsRaw.clickStyle) ? soundsRaw.clickStyle : "pop",
+    clickEverywhere: soundsRaw.clickEverywhere !== false,
   };
 
   return {

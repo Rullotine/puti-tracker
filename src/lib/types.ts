@@ -93,6 +93,10 @@ export type LiftPlan = {
 export type SoundPrefs = {
   clicks: boolean;
   clickVolume: number;
+  /** Which click sound to use (see CLICK_STYLES in lib/sounds.ts). */
+  clickStyle?: string;
+  /** Play the click on every button press, not just nav tabs. */
+  clickEverywhere?: boolean;
 };
 
 export type Snapshot = {

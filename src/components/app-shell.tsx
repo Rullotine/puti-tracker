@@ -26,7 +26,7 @@ import { startCloudSync } from "@/lib/cloud/sync";
 import { formatClock } from "@/lib/dates";
 import { useTracker } from "@/lib/store";
 import { applyTheme } from "@/lib/themes";
-import { playClick } from "@/lib/sounds";
+import { playClick, isClickStyle } from "@/lib/sounds";
 import { cn } from "@/lib/utils";
 
 export function AppShell() {
@@ -65,6 +65,7 @@ export function AppShell() {
       <TimerHost />
       <NotifyHost />
       <ThemeSync />
+      <ClickSoundHost />
       <ThemeScene />
       <SocialHost />
       <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-4 border-r border-line px-3 py-5 md:flex">
@@ -112,6 +113,30 @@ export function AppShell() {
   );
 }
 
+/** Plays the chosen click sound on any button / link / control press. */
+function ClickSoundHost() {
+  useEffect(() => {
+    const onDown = (event: Event) => {
+      const sounds = useTracker.getState().sounds;
+      if (!sounds?.clicks) return;
+      const target = event.target as Element | null;
+      const hit = target?.closest?.(
+        'button, a[href], [role="button"], [role="tab"], summary, input[type="checkbox"], input[type="radio"], select, label[for]',
+      );
+      if (!hit) return;
+      if ((hit as HTMLButtonElement).disabled) return;
+      // Nav tabs always click; everything else only when "everywhere" is on.
+      const isNav = hit.closest("nav, aside") !== null;
+      if (sounds.clickEverywhere === false && !isNav) return;
+      const style = isClickStyle(sounds.clickStyle) ? sounds.clickStyle : "pop";
+      playClick(sounds.clickVolume ?? 0.6, style);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+  }, []);
+  return null;
+}
+
 function ThemeSync() {
   const theme = useTracker((state) => state.theme);
   useEffect(() => {
@@ -148,8 +173,6 @@ function Brand({ onAlerts }: { onAlerts: () => void }) {
 
 function NavButton({ id, current, onSelect }: { id: ViewId; current: ViewId; onSelect: (id: ViewId) => void }) {
   const item = VIEWS.find((entry) => entry.id === id);
-  const clicks = useTracker((s) => s.sounds?.clicks ?? true);
-  const clickVolume = useTracker((s) => s.sounds?.clickVolume ?? 0.3);
   if (!item) return null;
   const Icon = item.icon;
   const on = current === id;
@@ -157,7 +180,6 @@ function NavButton({ id, current, onSelect }: { id: ViewId; current: ViewId; onS
     <button
       type="button"
       onClick={() => {
-        if (clicks) playClick(clickVolume);
         onSelect(id);
       }}
       aria-current={on ? "page" : undefined}

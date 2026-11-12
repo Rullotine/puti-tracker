@@ -104,7 +104,7 @@ const emptySnapshot = (): Snapshot => ({
   lifts: [],
   liftPlans: [],
   journal: [],
-  sounds: { clicks: true, clickVolume: 0.3 },
+  sounds: { clicks: true, clickVolume: 0.6, clickStyle: "pop", clickEverywhere: true },
 });
 
 function addMinutes(map: Record<string, number>, date: string, mins: number) {
