@@ -69,6 +69,12 @@ function saveLink(next: Link | null) {
   patch({ username: next?.username ?? null, status: next ? "idle" : "off" });
 }
 
+/** Session token of the logged-in sync account (used by friends / groups), or null when logged out. */
+export function getCloudToken(): string | null {
+  if (!link && typeof window !== "undefined") link = readLink();
+  return link?.token ?? null;
+}
+
 /* ---------- snapshot helpers ---------- */
 
 const tracker = () => useTracker.getState();

@@ -14,7 +14,7 @@
  */
 import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
-import { getSql } from "@/lib/db";
+import { dbSource, getSql } from "@/lib/db";
 import type { Snapshot } from "@/lib/types";
 
 export type Fail = { ok: false; code: "auth" | "error"; error: string };
@@ -32,12 +32,12 @@ const MIN_PASSWORD = 6;
 const MAX_PASSWORD = 200;
 const MAX_SNAPSHOT_BYTES = 4_000_000;
 
-const fail = (error: string, code: "auth" | "error" = "error"): Fail => ({ ok: false, code, error });
+export const fail = (error: string, code: "auth" | "error" = "error"): Fail => ({ ok: false, code, error });
 
 /* ---------- schema (idempotent, created on first use) ---------- */
 
 let ready: Promise<void> | null = null;
-function ensureTables(): Promise<void> {
+export function ensureTables(): Promise<void> {
   ready ??= (async () => {
     const sql = await getSql();
     await sql.query(
@@ -72,13 +72,17 @@ function ensureTables(): Promise<void> {
 
 /* ---------- helpers ---------- */
 
-function guard(): Fail | null {
+export function guard(): Fail | null {
   try {
     assertSameSiteRequest();
-    return null;
   } catch {
     return fail("Request blocked.");
   }
+  // On Vercel the embedded fallback database is wiped between requests, so accounts could never persist.
+  if (dbSource === "pglite" && process.env.VERCEL) {
+    return fail("The sync database isn't connected yet. The site owner needs to set DATABASE_URL on the server.");
+  }
+  return null;
 }
 
 function scryptHash(password: string, salt: Buffer): Promise<Buffer> {
@@ -89,7 +93,7 @@ function scryptHash(password: string, salt: Buffer): Promise<Buffer> {
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
-function cleanUsername(raw: unknown): string | null {
+export function cleanUsername(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const name = raw.trim().toLowerCase();
   return USERNAME_RE.test(name) ? name : null;
@@ -137,7 +141,7 @@ async function newSession(username: string): Promise<string> {
   return token;
 }
 
-async function userFromToken(token: unknown): Promise<string | null> {
+export async function userFromToken(token: unknown): Promise<string | null> {
   if (typeof token !== "string" || token.length < 32 || token.length > 200) return null;
   const sql = await getSql();
   const rows = await sql.query<{ username: string }>(

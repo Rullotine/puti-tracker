@@ -11,21 +11,10 @@
  * id it is looped seamlessly and used instead of the synth.
  */
 
-export type AmbientId =
-  | "off"
-  | "pink"
-  | "brown"
-  | "rain"
-  | "waves"
-  | "wind"
-  | "lofi"
-  | "campfire"
-  | "cafe"
-  | "forest"
-  | "vinyl";
+/** A sound id: "off", one of the built-in synths, or the slug of a file in src/assets/ambient/. */
+export type AmbientId = string;
 
-export const AMBIENTS: { id: AmbientId; label: string }[] = [
-  { id: "off", label: "Off" },
+const BUILTIN: { id: string; label: string }[] = [
   { id: "pink", label: "Pink" },
   { id: "brown", label: "Brown" },
   { id: "rain", label: "Rain" },
@@ -36,6 +25,10 @@ export const AMBIENTS: { id: AmbientId; label: string }[] = [
   { id: "cafe", label: "Cafe" },
   { id: "forest", label: "Forest" },
   { id: "vinyl", label: "Vinyl crackle" },
+  { id: "storm", label: "Thunderstorm" },
+  { id: "night", label: "Night crickets" },
+  { id: "fan", label: "Fan" },
+  { id: "train", label: "Train ride" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -48,11 +41,31 @@ const fileModules = import.meta.glob("../assets/ambient/*.{mp3,ogg,wav,m4a,aac,f
   import: "default",
 }) as Record<string, string>;
 
-const FILES: Partial<Record<AmbientId, string>> = {};
-for (const [path, url] of Object.entries(fileModules)) {
-  const name = (path.split("/").pop() ?? "").replace(/\.[^.]+$/, "").toLowerCase();
-  if (name !== "off" && AMBIENTS.some((a) => a.id === name)) FILES[name as AmbientId] = url;
+/** "Heavy Rain (loop).mp3" → id "heavy-rain-loop", label "Heavy rain loop". */
+function fileToSound(path: string): { id: string; label: string } | null {
+  const base = (path.split("/").pop() ?? "").replace(/\.[^.]+$/, "");
+  const id = base
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40)
+    .replace(/-+$/g, "");
+  if (!id || id === "off") return null;
+  const words = base.replace(/[-_]+/g, " ").replace(/[()[\]]/g, "").replace(/\s+/g, " ").trim();
+  return { id, label: words.charAt(0).toUpperCase() + words.slice(1) };
 }
+
+const FILES: Record<string, string> = {};
+const CUSTOM: { id: string; label: string }[] = [];
+for (const [path, url] of Object.entries(fileModules).sort(([a], [b]) => a.localeCompare(b))) {
+  const sound = fileToSound(path);
+  if (!sound) continue;
+  FILES[sound.id] = url;
+  if (!BUILTIN.some((b) => b.id === sound.id)) CUSTOM.push(sound);
+}
+
+/** Everything the pickers show: Off, the built-in synths, then one entry per audio file you added. */
+export const AMBIENTS: { id: AmbientId; label: string }[] = [{ id: "off", label: "Off" }, ...BUILTIN, ...CUSTOM];
 
 /* ------------------------------------------------------------------ */
 /* Shared audio context + state                                        */
@@ -335,6 +348,84 @@ const BUFFERS: Record<string, (ctx: AudioContext) => AudioBuffer> = {
     }, { rms: 0.06, peak: 0.9 }),
 };
 
+BUFFERS.thunder = (ctx) =>
+  render(
+    ctx,
+    36,
+    2,
+    (d, _ch, sr, n) => {
+      const rolls = 4;
+      for (let k = 0; k < rolls; k++) {
+        const pos = Math.floor(((k + rand() * 0.6) / rolls) * n);
+        const len = Math.floor(between(2.5, 4.5) * sr);
+        const amp = between(0.6, 1);
+        let deep = 0;
+        let rough = 0;
+        for (let i = 0; i < len; i++) {
+          const t = i / len;
+          const env = Math.min(1, t / 0.08) * Math.exp(-3.2 * t);
+          deep += 0.02 * (rand() * 2 - 1 - deep);
+          rough += 0.12 * (rand() * 2 - 1 - rough);
+          d[(pos + i) % n] += (deep * 5 + rough * 0.7 * Math.exp(-6 * t)) * env * amp;
+        }
+      }
+    },
+    { rms: 0.1, peak: 0.9 },
+  );
+
+BUFFERS.crickets = (ctx) =>
+  render(
+    ctx,
+    20,
+    2,
+    (d, _ch, sr, n) => {
+      for (let c = 0; c < 6; c++) {
+        const freq = between(3600, 5200);
+        const period = between(0.45, 0.8);
+        const pulses = 3 + Math.floor(rand() * 2);
+        const gap = between(0.035, 0.05);
+        const amp = between(0.4, 1);
+        const pulseLen = Math.floor(0.022 * sr);
+        for (let t0 = rand() * period; t0 < n / sr; t0 += period) {
+          for (let k = 0; k < pulses; k++) {
+            const start = Math.floor((t0 + k * gap) * sr);
+            for (let i = 0; i < pulseLen; i++) {
+              const env = Math.sin((Math.PI * i) / pulseLen) ** 2;
+              d[(start + i) % n] += Math.sin((2 * Math.PI * freq * i) / sr) * env * amp * 0.12;
+            }
+          }
+        }
+      }
+    },
+    { rms: 0.05, peak: 0.8 },
+  );
+
+// Rhythmic "da-dum, da-dum" of wheels over rail joints (16 joints = 8.8 s, seamless loop)
+BUFFERS.train = (ctx) =>
+  render(
+    ctx,
+    8.8,
+    2,
+    (d, ch, sr, n) => {
+      const period = 0.55;
+      const count = Math.round(n / sr / period);
+      for (let k = 0; k < count; k++) {
+        const base = Math.floor(k * period * sr);
+        for (let j = 0; j < 2; j++) {
+          const pos = base + Math.floor(j * 0.13 * sr) + (ch ? 40 : 0);
+          const amp = j === 0 ? 1 : 0.75;
+          burst(d, n, pos, 0.5 * amp, Math.floor(0.04 * sr), 0.35);
+          const len = Math.floor(0.14 * sr);
+          for (let i = 0; i < len; i++) {
+            const t = i / sr;
+            d[(pos + i) % n] += 0.5 * amp * Math.sin(2 * Math.PI * 85 * t) * Math.exp(-t * 28);
+          }
+        }
+      }
+    },
+    { rms: 0.1, peak: 0.9 },
+  );
+
 function getBuffer(ctx: AudioContext, key: string): AudioBuffer {
   let buf = bufferCache.get(key);
   if (!buf) {
@@ -405,10 +496,9 @@ function makeRig(ctx: AudioContext, nodes: AudioNode[]) {
 /* The sounds                                                          */
 /* ------------------------------------------------------------------ */
 
-type SynthId = Exclude<AmbientId, "off">;
 
 /** Each builder wires its layers into `mix` (the rig's output). */
-const SYNTHS: Record<SynthId, (r: Rig, mix: GainNode) => void> = {
+const SYNTHS: Record<string, (r: Rig, mix: GainNode) => void> = {
   pink(r, mix) {
     r.chain(r.src("pink"), mix);
   },
@@ -523,10 +613,48 @@ const SYNTHS: Record<SynthId, (r: Rig, mix: GainNode) => void> = {
     r.chain(r.src("vinyl"), r.gain(1.25), mix);
     r.chain(r.src("white"), r.filter("highpass", 3500), r.gain(0.05), mix);
   },
+
+  // Heavy rain, gusty wind and rolling thunder
+  storm(r, mix) {
+    r.chain(r.src("white"), r.filter("highpass", 700), r.filter("lowpass", 8000), r.gain(0.22), mix);
+    r.chain(r.src("rainDrops", 1.1), r.filter("highpass", 250), r.gain(1.4), mix);
+    r.chain(r.src("brown"), r.filter("lowpass", 300), r.gain(0.3), mix);
+    r.chain(r.src("thunder"), r.gain(1.6), mix);
+    const gusts = r.gain(0.12);
+    r.chain(r.src("pink"), r.filter("bandpass", 500, 0.8), gusts, mix);
+    r.lfo(0.11, 0.08, gusts.gain);
+  },
+
+  // Layers of crickets on a quiet night with a faint breeze
+  night(r, mix) {
+    r.chain(r.src("crickets"), r.gain(1.2), mix);
+    const breeze = r.gain(0.1);
+    r.chain(r.src("pink"), r.filter("lowpass", 700), breeze, mix);
+    r.lfo(0.05, 0.05, breeze.gain);
+    r.chain(r.src("brown"), r.filter("lowpass", 160), r.gain(0.08), mix);
+  },
+
+  // Steady fan whirr with a gentle blade wobble and motor hum
+  fan(r, mix) {
+    const body = r.gain(0.7);
+    r.chain(r.src("pink"), r.filter("lowpass", 2200), body, mix);
+    r.lfo(5.5, 0.05, body.gain);
+    const motor = r.osc("sine", 118);
+    r.lfo(0.3, 2, motor.detune);
+    r.chain(motor, r.gain(0.05), mix);
+    r.chain(r.src("white"), r.filter("bandpass", 3500, 0.7), r.gain(0.04), mix);
+  },
+
+  // Wheels over rail joints with a low carriage rumble
+  train(r, mix) {
+    r.chain(r.src("train"), r.gain(1), mix);
+    r.chain(r.src("brown"), r.filter("lowpass", 220), r.gain(0.45), mix);
+    r.chain(r.src("white"), r.filter("highpass", 2500), r.gain(0.05), mix);
+  },
 };
 
 /** Per-sound loudness leveling so switching sounds doesn't jump in volume. */
-const TRIM: Record<SynthId, number> = {
+const TRIM: Record<string, number> = {
   pink: 1.0,
   brown: 1.1,
   rain: 1.0,
@@ -537,6 +665,10 @@ const TRIM: Record<SynthId, number> = {
   cafe: 1.2,
   forest: 1.3,
   vinyl: 1.0,
+  storm: 1.1,
+  night: 1.2,
+  fan: 1.1,
+  train: 1.1,
 };
 
 /* ------------------------------------------------------------------ */
@@ -569,7 +701,8 @@ export function setAmbient(id: AmbientId, volume = 0.35) {
   master.connect(ctx.destination);
 
   const url = FILES[id];
-  const trim = url ? 1.6 : TRIM[id];
+  if (!url && !SYNTHS[id]) return; // unknown sound id (e.g. a friend's custom file this build doesn't have)
+  const trim = url ? 1.6 : (TRIM[id] ?? 1);
   master.gain.value = level(volume, trim);
 
   const startSynth = () => {

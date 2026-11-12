@@ -8,6 +8,8 @@ import { AlarmsView } from "@/components/views/alarms";
 import { AlertsView } from "@/components/views/alerts";
 import { CaloriesView } from "@/components/views/calories";
 import { FocusView } from "@/components/views/focus";
+import { FriendsView } from "@/components/views/friends";
+import { GroupsView } from "@/components/views/groups";
 import { JournalView } from "@/components/views/journal";
 import { LiftsView } from "@/components/views/lifts";
 import { HabitsView } from "@/components/views/habits";
@@ -18,6 +20,8 @@ import { NutrientsView } from "@/components/views/nutrients";
 import { SleepView } from "@/components/views/sleep";
 import { ThemesView } from "@/components/views/themes";
 import { TodayView } from "@/components/views/today";
+import { ThemeScene } from "@/components/mc-scene";
+import { SocialHost } from "@/components/social-host";
 import { startCloudSync } from "@/lib/cloud/sync";
 import { formatClock } from "@/lib/dates";
 import { useTracker } from "@/lib/store";
@@ -61,6 +65,8 @@ export function AppShell() {
       <TimerHost />
       <NotifyHost />
       <ThemeSync />
+      <ThemeScene />
+      <SocialHost />
       <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-4 border-r border-line px-3 py-5 md:flex">
         <Brand onAlerts={() => setView("alerts")} />
         <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto" aria-label="Sections">
@@ -95,6 +101,8 @@ export function AppShell() {
           {view === "alarms" ? <AlarmsView /> : null}
           {view === "alerts" ? <AlertsView /> : null}
           {view === "insights" ? <InsightsView /> : null}
+          {view === "friends" ? <FriendsView /> : null}
+          {view === "groups" ? <GroupsView /> : null}
           {view === "themes" ? <ThemesView /> : null}
           <DataTools />
         </main>

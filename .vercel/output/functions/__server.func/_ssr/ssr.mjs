@@ -108,7 +108,7 @@ var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 * the dev styles URL for route-scoped CSS collection.
 */
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-DwPojaVB.mjs");
+	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-Ye4hU1es.mjs");
 	const startManifest = tsrStartManifest();
 	let routes = startManifest.routes;
 	routes[rootRouteId];
@@ -130,23 +130,27 @@ async function getStartManifest(matchedRoutes) {
 var manifest = {
 	"12d2a2fbe473400b70f1f0299a329880a2397d7e47810900f92a15bb954bd26a": {
 		functionName: "cloudLogout_createServerFn_handler",
-		importer: () => import("./api-BmVYg6nh.mjs")
+		importer: () => import("./api-BA8121ZP.mjs")
 	},
 	"23bd0378e4ec83198d282ff3b625fbf356335013869c72bc99f293b4dc9468e3": {
 		functionName: "cloudRegister_createServerFn_handler",
-		importer: () => import("./api-BmVYg6nh.mjs")
+		importer: () => import("./api-BA8121ZP.mjs")
 	},
 	"427ed08c54ab7ab30e8e7a1ab8459ae9bdbf65ca2b672b77ed815480d55292d3": {
 		functionName: "cloudPush_createServerFn_handler",
-		importer: () => import("./api-BmVYg6nh.mjs")
+		importer: () => import("./api-BA8121ZP.mjs")
 	},
 	"47b637c7df428224c5521f385dce74e2de3a932d283a5e8310474aa485f41c62": {
 		functionName: "cloudPull_createServerFn_handler",
-		importer: () => import("./api-BmVYg6nh.mjs")
+		importer: () => import("./api-BA8121ZP.mjs")
+	},
+	"b915fbaadf83500a1a1c30538c082b3f2bede60ec749b949c3f3f0ae4b2dd15d": {
+		functionName: "socialCall_createServerFn_handler",
+		importer: () => import("./api-DomYr5pS.mjs")
 	},
 	"f28f01621dc52d02dfc02b578f511b540b2c7fb1387b6be367c65c05e7ef034d": {
 		functionName: "cloudLogin_createServerFn_handler",
-		importer: () => import("./api-BmVYg6nh.mjs")
+		importer: () => import("./api-BA8121ZP.mjs")
 	}
 };
 async function getServerFnById(id, access) {
@@ -1551,7 +1555,7 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-6judHAKl.mjs").then((n) => n.t),
+		import("./router-CehKDIIp.mjs").then((n) => n.t),
 		import("./start-5Z2QO8AU.mjs"),
 		import("./empty-plugin-adapters-D9UWiqvJ.mjs")
 	]);

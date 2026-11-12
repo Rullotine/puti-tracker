@@ -250,3 +250,175 @@ html[data-special="lush"] body::before {
     radial-gradient(circle at 20% 80%, rgba(74, 222, 128, 0.15), transparent 40%),
     radial-gradient(circle at 80% 30%, rgba(34, 197, 94, 0.1), transparent 35%);
 }
+
+/* ------------------------------------------------------------------ */
+/* Minecraft Classic: stone inventory UI over a static pixel landscape  */
+/* (the scene itself is components/mc-scene.tsx). No grid / scanline    */
+/* overlays here — just a few gentle, cozy motions.                     */
+/* ------------------------------------------------------------------ */
+
+html[data-theme="mcclassic"] body {
+  background-image: none;
+  background-color: #79b0ff;
+  image-rendering: pixelated;
+}
+
+html[data-theme="mcclassic"] body::before,
+html[data-theme="mcclassic"] body::after {
+  display: none;
+}
+
+html[data-theme="mcclassic"] .font-display,
+html[data-theme="mcclassic"] .font-minecraft {
+  font-family: var(--font-minecraft) !important;
+  font-size: 0.85em;
+}
+
+html[data-theme="mcclassic"] .panel {
+  border-radius: 0;
+  border: 3px solid;
+  border-color: #ffffff #555555 #555555 #ffffff;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px #000, 0 6px 0 2px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="mcclassic"] .btn {
+  border-radius: 0;
+  border: 3px solid;
+  border-color: #ffffff #373737 #373737 #ffffff;
+  box-shadow: 0 0 0 2px #000;
+}
+
+html[data-theme="mcclassic"] .btn-primary {
+  background-image: none;
+  background-color: #3f7d22;
+  color: #fff;
+  border-color: #8fd36a #1f4a0e #1f4a0e #8fd36a;
+}
+
+html[data-theme="mcclassic"] .btn-ghost {
+  background: #8b8b8b;
+  color: #202020;
+}
+
+html[data-theme="mcclassic"] .field {
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  background: #a8a8a8;
+}
+
+html[data-theme="mcclassic"] aside {
+  background: rgba(198, 198, 198, 0.92);
+  border-right: 3px solid #373737;
+}
+
+html[data-theme="mcclassic"] main h1,
+html[data-theme="mcclassic"] main header p {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.mc-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, #5d9bff 0%, #8fc0ff 45%, #cfe6ff 78%, #e8f3ff 100%);
+}
+
+.mc-sun {
+  position: absolute;
+  top: 8vh;
+  right: 12vw;
+  width: 72px;
+  height: 72px;
+  background: #fff6a0;
+  box-shadow: 0 0 0 8px rgba(255, 246, 160, 0.35), 0 0 70px 24px rgba(255, 240, 140, 0.45);
+  animation: mc-sun 9s ease-in-out infinite alternate;
+}
+
+.mc-cloud {
+  position: absolute;
+  left: 0;
+  height: auto;
+  will-change: transform;
+  animation: mc-drift linear infinite;
+}
+
+.mc-orb {
+  position: absolute;
+  bottom: 14vh;
+  width: 6px;
+  height: 6px;
+  background: #b9ff4a;
+  box-shadow: 0 0 10px 3px rgba(185, 255, 74, 0.55);
+  opacity: 0;
+  animation: mc-orb ease-in-out infinite;
+}
+
+.mc-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: mc-breathe 4.2s ease-in-out infinite;
+}
+
+.mc-blink {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: mc-blink 6s steps(1, end) infinite;
+}
+
+.mc-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: mc-flame 0.9s steps(1, end) infinite;
+}
+
+.mc-glow {
+  animation: mc-glow 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes mc-drift {
+  from { transform: translateX(-30vw); }
+  to { transform: translateX(110vw); }
+}
+
+@keyframes mc-sun {
+  from { transform: scale(1); opacity: 0.92; }
+  to { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes mc-orb {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 1; }
+  50% { transform: translate(14px, -22vh); }
+  85% { opacity: 0.9; }
+  100% { transform: translate(-6px, -44vh); opacity: 0; }
+}
+
+@keyframes mc-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.035); }
+}
+
+@keyframes mc-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96%, 98% { transform: scaleY(0.1); }
+}
+
+@keyframes mc-flame {
+  0% { transform: scale(1, 1); }
+  35% { transform: scale(0.8, 1.15); }
+  70% { transform: scale(1, 0.9); }
+}
+
+@keyframes mc-glow {
+  from { opacity: 0.14; }
+  to { opacity: 0.28; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-anim { animation: none !important; }
+  .mc-orb { display: none; }
+}

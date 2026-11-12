@@ -4,6 +4,7 @@ import { MatrixRain } from "@/components/matrix";
 import { StreakBoard } from "@/components/streak";
 import { DaySwitcher, Panel, ProgressRing } from "@/components/ui";
 import { AMBIENTS, setAmbient, setAmbientVolume, stopAmbient, type AmbientId } from "@/lib/ambient";
+import { useSocial } from "@/lib/social/client";
 import { formatClock, formatHm, todayISO } from "@/lib/dates";
 import { useTracker } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -67,16 +68,22 @@ export function FocusView() {
   const presets = mode === "work" ? WORK_PRESETS : MEDITATE_PRESETS;
 
   useEffect(() => {
+    // Leave a group's shared sound alone until the person picks their own sound here.
+    if (ambient === "off" && useSocial.getState().listeningGroupId) return;
     setAmbient(ambient, volume);
-    return () => stopAmbient();
+    return () => {
+      if (!useSocial.getState().listeningGroupId) stopAmbient();
+    };
   }, [ambient]);
 
   useEffect(() => {
-    setAmbientVolume(volume);
+    if (ambient !== "off") setAmbientVolume(volume);
   }, [volume]);
 
   useEffect(() => {
-    return () => stopAmbient();
+    return () => {
+      if (!useSocial.getState().listeningGroupId) stopAmbient();
+    };
   }, []);
 
   function chooseMode(next: Mode) {
@@ -211,7 +218,10 @@ export function FocusView() {
                       "btn btn-ghost h-8 px-2.5 text-xs",
                       ambient === a.id && "bg-primary/15 text-primary",
                     )}
-                    onClick={() => setAmbientId(a.id)}
+                    onClick={() => {
+                      if (a.id !== "off") useSocial.getState().setListening(null);
+                      setAmbientId(a.id);
+                    }}
                   >
                     {a.label}
                   </button>

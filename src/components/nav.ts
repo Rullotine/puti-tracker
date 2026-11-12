@@ -12,6 +12,8 @@ import {
   Palette,
   Pill,
   Timer,
+  UserPlus,
+  Users,
   Utensils,
   type LucideIcon,
 } from "lucide-react";
@@ -30,6 +32,8 @@ export type ViewId =
   | "alarms"
   | "alerts"
   | "insights"
+  | "friends"
+  | "groups"
   | "themes";
 
 export const VIEWS: { id: ViewId; label: string; icon: LucideIcon }[] = [
@@ -46,5 +50,7 @@ export const VIEWS: { id: ViewId; label: string; icon: LucideIcon }[] = [
   { id: "alarms", label: "Alarms", icon: AlarmClock },
   { id: "alerts", label: "Alerts", icon: Bell },
   { id: "insights", label: "Insights", icon: BarChart3 },
+  { id: "friends", label: "Friends", icon: UserPlus },
+  { id: "groups", label: "Groups", icon: Users },
   { id: "themes", label: "Themes", icon: Palette },
 ];
