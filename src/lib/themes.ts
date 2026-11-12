@@ -14,7 +14,7 @@ export type Theme = {
   on: string;
   line: string;
   /** Optional special background treatment (css class or pattern) */
-  special?: "minecraft" | "lush" | "mcclassic";
+  special?: "minecraft" | "lush" | "mcclassic" | "cherry" | "lushcave" | "amethyst";
 };
 
 export const THEMES: Theme[] = [
@@ -41,13 +41,18 @@ export const THEMES: Theme[] = [
   { id: "obsidian", name: "Obsidian", mode: "dark", bg: "#08080c", ink: "#0e0e14", surface: "#16161e", fg: "#e6e6f0", muted: "#8c8c9c", primary: "#7c6af0", deep: "#5b4bd4", on: "#100c28", line: "#28283a" },
   { id: "midnight", name: "Midnight", mode: "dark", bg: "#05050a", ink: "#0a0a12", surface: "#12121c", fg: "#e8e8f4", muted: "#8e8ea0", primary: "#6366f1", deep: "#4f46e5", on: "#0c0a28", line: "#24243a" },
 
-  // --- Minecraft theme ---
-  { id: "minecraft", name: "Minecraft", mode: "dark", bg: "#1a1208", ink: "#22180c", surface: "#2e2414", fg: "#e8dcc0", muted: "#a89060", primary: "#5a9c3a", deep: "#3d7a24", on: "#14200c", line: "#4a3c20", special: "minecraft" },
+  // --- 8bit theme (id stays "minecraft" so saved choices keep working) ---
+  { id: "minecraft", name: "8bit", mode: "dark", bg: "#1a1208", ink: "#22180c", surface: "#2e2414", fg: "#e8dcc0", muted: "#a89060", primary: "#5a9c3a", deep: "#3d7a24", on: "#14200c", line: "#4a3c20", special: "minecraft" },
 
-  // --- Minecraft Classic: stone inventory UI over a pixel-art landscape (drawn by components/mc-scene.tsx) ---
-  { id: "mcclassic", name: "Minecraft Classic", mode: "light", bg: "#79b0ff", ink: "#a8a8a8", surface: "#c6c6c6", fg: "#202020", muted: "#454545", primary: "#2f6b17", deep: "#245512", on: "#ffffff", line: "#373737", special: "mcclassic" },
+  // --- 8bit Classic: stone inventory UI over a pixel-art landscape (drawn by components/mc-scene.tsx) ---
+  { id: "mcclassic", name: "8bit Classic", mode: "light", bg: "#79b0ff", ink: "#a8a8a8", surface: "#c6c6c6", fg: "#202020", muted: "#454545", primary: "#2f6b17", deep: "#245512", on: "#ffffff", line: "#373737", special: "mcclassic" },
   // --- Cozy lush (MC lush cave vibe) ---
   { id: "lush", name: "Cozy lush", mode: "dark", bg: "#0a1410", ink: "#0e1c16", surface: "#142820", fg: "#d8f0e0", muted: "#7ab090", primary: "#4ade80", deep: "#22c55e", on: "#052010", line: "#1e4a34", special: "lush" },
+
+  // --- Animated scene themes (backdrops live in components/scenes/*) ---
+  { id: "cherry", name: "Cherry grove", mode: "light", bg: "#ffe3ee", ink: "#ffd3e4", surface: "#fff3f8", fg: "#43192f", muted: "#8c4c68", primary: "#b8336f", deep: "#96255a", on: "#fff5fa", line: "#f3b4cf", special: "cherry" },
+  { id: "lushcave", name: "Lush cave", mode: "dark", bg: "#04110d", ink: "#071a14", surface: "#0b2a22", fg: "#dcf7e6", muted: "#86bfa0", primary: "#58e0a8", deep: "#2fb683", on: "#04221a", line: "#1c5a48", special: "lushcave" },
+  { id: "amethyst", name: "Amethyst room", mode: "dark", bg: "#120824", ink: "#1a0d33", surface: "#26144a", fg: "#f3e9ff", muted: "#bba6e0", primary: "#c99bff", deep: "#a566f0", on: "#1d0b3a", line: "#4b2d80", special: "amethyst" },
 
   // --- Feminine pink ---
   { id: "pinkvibe", name: "Pink vibe", mode: "light", bg: "#fff0f5", ink: "#ffe4ec", surface: "#ffffff", fg: "#4a1028", muted: "#b06a88", primary: "#ec4899", deep: "#db2777", on: "#fdf2f8", line: "#f8c8d8" },

@@ -1,8 +1,11 @@
 import { useMemo, type ReactNode } from "react";
 import { useTracker } from "@/lib/store";
+import { AmethystScene } from "@/components/scenes/amethyst";
+import { CherryScene } from "@/components/scenes/cherry";
+import { LushCaveScene } from "@/components/scenes/lush-cave";
 
 /**
- * Backdrop for the "Minecraft Classic" theme: a static pixel-art landscape
+ * Backdrop for the "8bit Classic" theme: a static pixel-art landscape
  * (sky, hills, trees, flowers, creepers) with a few gentle, cozy motions —
  * drifting clouds, a softly glowing sun, breathing/blinking creepers, a
  * flickering torch and slowly rising XP orbs. Everything animates with
@@ -220,8 +223,12 @@ function Scene() {
   );
 }
 
-/** Renders the Minecraft Classic backdrop only while that theme is selected. */
+/** Renders the animated backdrop for the selected theme (8bit Classic, Cherry grove, Lush cave, Amethyst room). */
 export function ThemeScene() {
   const theme = useTracker((state) => state.theme);
-  return theme === "mcclassic" ? <Scene /> : null;
+  if (theme === "mcclassic") return <Scene />;
+  if (theme === "cherry") return <CherryScene />;
+  if (theme === "lushcave") return <LushCaveScene />;
+  if (theme === "amethyst") return <AmethystScene />;
+  return null;
 }

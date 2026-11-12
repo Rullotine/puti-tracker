@@ -6,6 +6,15 @@ import { CloudPanel } from "@/components/cloud-panel";
 import { THEMES, findTheme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
+const TAGS: Record<string, string> = {
+  minecraft: "pixel",
+  mcclassic: "animated",
+  lush: "glow",
+  cherry: "animated",
+  lushcave: "animated",
+  amethyst: "animated",
+};
+
 export function ThemesView() {
   const theme = useTracker((state) => state.theme);
   const setTheme = useTracker((state) => state.setTheme);
@@ -22,7 +31,7 @@ export function ThemesView() {
       <header>
         <h1 className="font-display text-2xl font-semibold">Themes</h1>
         <p className="mt-1 text-sm text-muted">
-          {THEMES.length} desks, {lights.length} light · Minecraft font auto-applies on the Minecraft theme
+          {THEMES.length} desks, {lights.length} light · pixel font auto-applies on the 8bit theme · animated scenes on 8bit Classic, Cherry grove, Lush cave and Amethyst room
         </p>
       </header>
       <Panel title="Your name">
@@ -92,7 +101,7 @@ function ThemeGrid({
             <span className="mt-4 block font-display font-semibold">{item.name}</span>
             <span className="text-xs" style={{ color: item.muted }}>
               {item.mode}
-              {item.special ? ` · ${item.special}` : ""}
+              {item.special && TAGS[item.special] ? ` · ${TAGS[item.special]}` : ""}
             </span>
           </button>
         ))}

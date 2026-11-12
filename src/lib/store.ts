@@ -7,6 +7,9 @@ import { buildSample } from "@/lib/sample";
 import type { Alarm, Food, Habit, JournalEntry, LiftLog, LiftPlan, LiftSet, Meal, Med, Note, NoticeKind, SleepNight, Snapshot, SoundPrefs, Task, TimerState } from "@/lib/types";
 import { clamp } from "@/lib/utils";
 
+/** Longest single focus session, in minutes (matches the 12h daily-goal cap). */
+export const MAX_SESSION_MIN = 720;
+
 const DEFAULT_TIMER: TimerState = { status: "idle", totalSec: 25 * 60, leftSec: 25 * 60, endsAt: null };
 
 type Tracker = Snapshot & {
@@ -279,7 +282,7 @@ export const useTracker = create<Tracker>()(
       setPreset: (minutes) => {
         const state = get();
         if (state.timer.status === "running") return;
-        const totalSec = clamp(Math.round(minutes), 1, 180) * 60;
+        const totalSec = clamp(Math.round(minutes) || 1, 1, MAX_SESSION_MIN) * 60;
         set({ timer: { status: "idle", totalSec, leftSec: totalSec, endsAt: null }, banner: false });
       },
       startTimer: () => {

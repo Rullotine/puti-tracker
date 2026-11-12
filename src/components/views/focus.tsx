@@ -6,10 +6,10 @@ import { DaySwitcher, Panel, ProgressRing } from "@/components/ui";
 import { AMBIENTS, setAmbient, setAmbientVolume, stopAmbient, type AmbientId } from "@/lib/ambient";
 import { useSocial } from "@/lib/social/client";
 import { formatClock, formatHm, todayISO } from "@/lib/dates";
-import { useTracker } from "@/lib/store";
+import { MAX_SESSION_MIN, useTracker } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-const WORK_PRESETS = [15, 25, 45, 60];
+const WORK_PRESETS = [15, 25, 45, 60, 90, 120, 180];
 const MEDITATE_PRESETS = [5, 10, 15, 20];
 
 const QUOTES = [
@@ -55,6 +55,7 @@ export function FocusView() {
   const [mode, setMode] = useState<Mode>("work");
   const [ambient, setAmbientId] = useState<AmbientId>("off");
   const [volume, setVolume] = useState(0.4);
+  const [custom, setCustom] = useState("");
 
   const quote = useMemo(() => pickQuote(), []);
   const today = todayISO();
@@ -63,6 +64,8 @@ export function FocusView() {
   const goalMins = goalHours * 60;
   const progress = timer.totalSec === 0 ? 0 : 1 - timer.leftSec / timer.totalSec;
   const dayTasks = tasks.filter((task) => task.date === date);
+  const customMins = Number(custom);
+  const customOk = Number.isFinite(customMins) && customMins >= 1 && customMins <= MAX_SESSION_MIN;
   const running = timer.status === "running";
   const paused = timer.status === "paused";
   const presets = mode === "work" ? WORK_PRESETS : MEDITATE_PRESETS;
@@ -162,7 +165,7 @@ export function FocusView() {
                 ) : null}
                 <ProgressRing progress={running || paused ? progress : 0} label={`Focus timer ${formatClock(timer.leftSec)}`}>
                   <div>
-                    <p className={cn("font-mono text-5xl font-semibold tabular-nums", running && "timer-flicker")}>
+                    <p className={cn("font-mono font-semibold tabular-nums", timer.leftSec >= 3600 ? "text-4xl" : "text-5xl", running && "timer-flicker")}>
                       {formatClock(timer.leftSec)}
                     </p>
                   </div>
@@ -203,6 +206,39 @@ export function FocusView() {
                 </button>
               ))}
             </div>
+
+            <form
+              className="mt-3 flex flex-wrap items-center justify-center gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!customOk || running) return;
+                setPreset(Math.round(customMins));
+                setCustom("");
+              }}
+            >
+              <label className="flex items-center gap-2 text-xs text-muted">
+                Custom
+                <input
+                  className="field !h-9 !w-24 text-center tabular-nums"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={MAX_SESSION_MIN}
+                  step={1}
+                  value={custom}
+                  placeholder="minutes"
+                  aria-label="Custom session length in minutes"
+                  disabled={running}
+                  onChange={(event) => setCustom(event.target.value)}
+                />
+              </label>
+              <button type="submit" className="btn btn-ghost h-9 px-3 text-sm" disabled={running || !customOk}>
+                Set length
+              </button>
+            </form>
+            <p className="mt-2 text-center text-xs text-muted">
+              Session length: <span className="tabular-nums text-fg">{formatHm(timer.totalSec / 60)}</span> · up to 12 hours
+            </p>
 
             <div className="mt-4 w-full max-w-sm px-1">
               <div className="mb-2 flex items-center gap-2 text-xs text-muted">

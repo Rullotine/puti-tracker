@@ -65,9 +65,12 @@ export function formatHm(mins: number): string {
 
 export function formatClock(sec: number): string {
   const s = Math.max(0, Math.round(sec));
-  const m = Math.floor(s / 60);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
   const r = s % 60;
-  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(r).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
 export function uid(): string {
