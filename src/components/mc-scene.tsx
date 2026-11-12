@@ -4,6 +4,7 @@ import { AmethystScene } from "@/components/scenes/amethyst";
 import { CherryScene } from "@/components/scenes/cherry";
 import { LushCaveScene } from "@/components/scenes/lush-cave";
 import { ChuhahuaScene } from "@/components/scenes/chuhahua";
+import { SpookyScene } from "@/components/scenes/spooky";
 
 /**
  * Backdrop for the "8bit Classic" theme: a static pixel-art landscape
@@ -224,7 +225,7 @@ function Scene() {
   );
 }
 
-/** Renders the animated backdrop for the selected theme (8bit Classic, Cherry grove, Lush cave, Amethyst room, Chuhahua). */
+/** Renders the animated backdrop for the selected theme (8bit Classic, Cherry grove, Lush cave, Amethyst room, Chuhahua, Spooky). */
 export function ThemeScene() {
   const theme = useTracker((state) => state.theme);
   if (theme === "mcclassic") return <Scene />;
@@ -232,5 +233,6 @@ export function ThemeScene() {
   if (theme === "lushcave") return <LushCaveScene />;
   if (theme === "amethyst") return <AmethystScene />;
   if (theme === "chuhahua") return <ChuhahuaScene />;
+  if (theme === "spooky") return <SpookyScene />;
   return null;
 }

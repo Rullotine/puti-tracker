@@ -27,6 +27,7 @@ const BUILTIN: { id: string; label: string }[] = [
   { id: "vinyl", label: "Vinyl crackle" },
   { id: "night", label: "Night crickets" },
   { id: "fan", label: "Fan" },
+  { id: "halloween", label: "Halloween" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -373,6 +374,109 @@ BUFFERS.crickets = (ctx) =>
     { rms: 0.05, peak: 0.8 },
   );
 
+/**
+ * Slow, slightly out-of-tune music-box waltz in A minor. 16 bars of 3/4 at
+ * 0.78 s per beat (~37 s) with a few notes dropped or lifted an octave on the
+ * second pass. Notes ring over the loop point, so it repeats without a gap.
+ */
+BUFFERS.halloweenBox = (ctx) => {
+  const beat = 0.78;
+  const A: [number, number][] = [[0, 659.25], [1.5, 587.33], [2, 523.25], [3, 493.88], [4.5, 523.25], [5, 587.33], [6, 659.25], [7.5, 440], [9, 440], [10.5, 523.25], [11, 493.88]];
+  const B: [number, number][] = [[12, 587.33], [13.5, 523.25], [14, 493.88], [15, 440], [16.5, 493.88], [17, 523.25], [18, 415.3], [19.5, 493.88], [21, 659.25], [22.5, 622.25], [23, 659.25]];
+  const roots = [110, 110, 87.31, 82.41, 110, 110, 87.31, 82.41];
+  const chords: [number, number][] = [[261.63, 329.63], [261.63, 329.63], [220, 261.63], [246.94, 311.13], [261.63, 329.63], [261.63, 329.63], [220, 261.63], [246.94, 311.13]];
+  const notes: { at: number; f: number; amp: number }[] = [];
+  const tune = () => 1 + (rand() - 0.5) * 0.012; // music-box tines are never quite in tune
+  for (let rep = 0; rep < 2; rep++) {
+    const off = rep * 24;
+    [...A, ...B].forEach(([b, f], i) => {
+      if (rep === 1 && i % 7 === 5) return;
+      notes.push({ at: off + b, f: f * (rep === 1 && i % 5 === 3 ? 2 : 1) * tune(), amp: 1 });
+    });
+    roots.forEach((root, bar) => {
+      const bb = off + bar * 3;
+      notes.push({ at: bb, f: root * tune(), amp: 0.9 });
+      notes.push({ at: bb + 1, f: chords[bar][0] * tune(), amp: 0.28 });
+      notes.push({ at: bb + 2, f: chords[bar][1] * tune(), amp: 0.28 });
+    });
+  }
+  let mono: Float32Array | null = null;
+  return render(
+    ctx,
+    48 * beat,
+    2,
+    (d, ch, sr, n) => {
+      if (ch === 0 || !mono) {
+        // heavy part runs once; the right channel reuses it a hair later for width
+        const m = new Float32Array(n);
+        const len = Math.floor(1.8 * sr);
+        for (const note of notes) {
+          const pos = Math.floor(note.at * beat * sr);
+          for (let i = 0; i < len; i++) {
+            const t = i / sr;
+            let v = Math.sin(2 * Math.PI * note.f * t) * Math.exp(-t * 2.6);
+            if (t < 1.2) v += 0.38 * Math.sin(2 * Math.PI * note.f * 2 * t) * Math.exp(-t * 5.2);
+            if (t < 0.6) v += 0.16 * Math.sin(2 * Math.PI * note.f * 4.17 * t) * Math.exp(-t * 9);
+            m[(pos + i) % n] += v * Math.min(1, i / (0.002 * sr)) * note.amp * 0.5;
+          }
+        }
+        mono = m;
+      }
+      const shift = ch ? Math.floor(0.011 * sr) : 0;
+      for (let i = 0; i < n; i++) d[(i + shift) % n] += mono[i];
+    },
+    { rms: 0.09, peak: 0.85 },
+  );
+};
+
+/** Distant bell tolls, door creaks and one long howl, spread over 40 s. */
+BUFFERS.halloweenFx = (ctx) =>
+  render(
+    ctx,
+    40,
+    2,
+    (d, ch, sr, n) => {
+      const gain = ch ? 0.85 : 1;
+      const ratios = [1, 2, 2.4, 3, 4.07, 5.4];
+      const weights = [1, 0.6, 0.5, 0.35, 0.25, 0.15];
+      const decays = [0.7, 0.9, 1.1, 1.4, 1.8, 2.4];
+      for (const t0 of [5, 24]) {
+        const pos = Math.floor(t0 * sr);
+        const len = Math.floor(6 * sr);
+        for (let i = 0; i < len; i++) {
+          const t = i / sr;
+          let v = 0;
+          for (let k = 0; k < ratios.length; k++) v += weights[k] * Math.sin(2 * Math.PI * 196 * ratios[k] * t) * Math.exp(-t * decays[k]);
+          d[(pos + i) % n] += v * 0.5 * gain * Math.min(1, i / (0.003 * sr));
+        }
+      }
+      for (const t0 of [14, 32.5]) {
+        const pos = Math.floor(t0 * sr);
+        const len = Math.floor(1.6 * sr);
+        let ph = 0;
+        let lp = 0;
+        for (let i = 0; i < len; i++) {
+          const t = i / len;
+          const f = 70 + 60 * t + 18 * Math.sin((i / sr) * 23);
+          ph += (2 * Math.PI * f) / sr;
+          const saw = ((ph / (2 * Math.PI)) % 1) * 2 - 1;
+          lp += 0.08 * (saw - lp);
+          d[(pos + i) % n] += lp * Math.sin(Math.PI * t) ** 2 * 0.45 * gain;
+        }
+      }
+      const hp = Math.floor(20.5 * sr);
+      const hl = Math.floor(3.6 * sr);
+      let hph = 0;
+      for (let i = 0; i < hl; i++) {
+        const t = i / hl;
+        const f = 300 + 220 * Math.sin(Math.PI * t) - 60 * t + 5 * Math.sin((2 * Math.PI * 5.5 * i) / sr);
+        hph += (2 * Math.PI * f) / sr;
+        d[(hp + i) % n] += (Math.sin(hph) + 0.3 * Math.sin(2 * hph)) * Math.sin(Math.PI * t) ** 2 * 0.22 * gain;
+      }
+    },
+    { rms: 0.05, peak: 0.8 },
+  );
+
 function getBuffer(ctx: AudioContext, key: string): AudioBuffer {
   let buf = bufferCache.get(key);
   if (!buf) {
@@ -581,6 +685,21 @@ const SYNTHS: Record<string, (r: Rig, mix: GainNode) => void> = {
     r.chain(r.src("white"), r.filter("bandpass", 3500, 0.7), r.gain(0.04), mix);
   },
 
+  // Music-box waltz, cold wind, a low drone, far-off bell / creaks / howl and crickets
+  halloween(r, mix) {
+    r.chain(r.src("halloweenBox"), r.filter("lowpass", 5200), r.gain(0.95), mix);
+    r.chain(r.src("halloweenFx"), r.gain(0.9), mix);
+    const gust = r.gain(0.3);
+    r.chain(r.src("pink", 0.8), r.filter("bandpass", 420, 0.7), gust, mix);
+    r.lfo(0.06, 0.2, gust.gain);
+    r.lfo(0.17, 0.1, gust.gain);
+    r.chain(r.src("brown"), r.filter("lowpass", 140), r.gain(0.2), mix);
+    const drone = r.osc("sine", 55);
+    r.lfo(0.04, 6, drone.detune);
+    r.chain(drone, r.gain(0.07), mix);
+    r.chain(r.osc("sine", 82.7), r.gain(0.035), mix);
+    r.chain(r.src("crickets"), r.gain(0.22), mix);
+  },
 };
 
 /** Per-sound loudness leveling so switching sounds doesn't jump in volume. */
@@ -597,6 +716,7 @@ const TRIM: Record<string, number> = {
   vinyl: 1.0,
   night: 1.2,
   fan: 1.1,
+  halloween: 1.3,
 };
 
 /* ------------------------------------------------------------------ */

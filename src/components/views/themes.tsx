@@ -3,6 +3,7 @@ import { Panel } from "@/components/ui";
 import { useTracker } from "@/lib/store";
 import { playClick, CLICK_STYLES, DEFAULT_CLICK_STYLE, isClickStyle } from "@/lib/sounds";
 import { CloudPanel } from "@/components/cloud-panel";
+import { SpookyBadges } from "@/components/spooky-badges";
 import { THEMES, THEME_BADGES, findTheme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ const TAGS: Record<string, string> = {
   lushcave: "animated",
   amethyst: "animated",
   chuhahua: "animated",
+  spooky: "animated",
 };
 
 export function ThemesView() {
@@ -34,7 +36,7 @@ export function ThemesView() {
       <header>
         <h1 className="font-display text-2xl font-semibold">Themes</h1>
         <p className="mt-1 text-sm text-muted">
-          {THEMES.length} desks, {lights.length} light · animated scenes on 8bit Classic, Cherry grove, Lush cave, Amethyst room and Chuhahua
+          {THEMES.length} desks, {lights.length} light · animated scenes on 8bit Classic, Cherry grove, Lush cave, Amethyst room, Chuhahua and Spooky
         </p>
       </header>
       <Panel title="Your name">
@@ -50,6 +52,7 @@ export function ThemesView() {
         </form>
         <p className="mt-2 text-sm text-muted">ks2v stays in the corner as the builder. This name is yours.</p>
       </Panel>
+      {findTheme(theme).id === "spooky" ? <SpookyBadges /> : null}
       <ThemeGrid title="Dark" items={darks} current={findTheme(theme).id} onPick={setTheme} />
       <ThemeGrid title="Light" items={lights} current={findTheme(theme).id} onPick={setTheme} />
 
