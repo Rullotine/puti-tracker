@@ -45,7 +45,7 @@ export const THEMES: Theme[] = [
   { id: "lushcave", name: "Lush cave", mode: "dark", bg: "#04110d", ink: "#071a14", surface: "#0b2a22", fg: "#dcf7e6", muted: "#86bfa0", primary: "#58e0a8", deep: "#2fb683", on: "#04221a", line: "#1c5a48", special: "lushcave" },
   { id: "amethyst", name: "Amethyst room", mode: "dark", bg: "#120824", ink: "#1a0d33", surface: "#26144a", fg: "#f3e9ff", muted: "#bba6e0", primary: "#c99bff", deep: "#a566f0", on: "#1d0b3a", line: "#4b2d80", special: "amethyst" },
   { id: "chuhahua", name: "Chuhahua", mode: "dark", bg: "#0f0a06", ink: "#171008", surface: "#241812", fg: "#f7e9d2", muted: "#c8a478", primary: "#ffb454", deep: "#e0862e", on: "#2b1704", line: "#4c3520", special: "chuhahua" },
-  { id: "spooky", name: "Spooky", mode: "dark", bg: "#0d0716", ink: "#150d22", surface: "#1f1330", fg: "#f6e8d8", muted: "#b9a0c9", primary: "#ff8a2b", deep: "#e8650f", on: "#1d0c02", line: "#4a2a55", special: "spooky" },
+  { id: "spooky", name: "Hollowmere", mode: "dark", bg: "#050706", ink: "#090c0b", surface: "#101412", fg: "#dad3c1", muted: "#939d92", primary: "#cb4a3c", deep: "#8a1f17", on: "#fff2e4", line: "#2b3430", special: "spooky" },
 
   // --- Feminine pink ---
   { id: "rose", name: "Rose", mode: "light", bg: "#fdf2f8", ink: "#fce7f3", surface: "#ffffff", fg: "#500724", muted: "#9d174d", primary: "#f472b6", deep: "#e11d8a", on: "#fdf2f8", line: "#fbcfe8" },
@@ -70,7 +70,7 @@ export const THEME_BADGES: Record<string, string> = {
   lushcave: "mystique",
   amethyst: "mystique",
   chuhahua: "author",
-  spooky: "halloween",
+  spooky: "cursed",
   barbie: "solid",
 };
 

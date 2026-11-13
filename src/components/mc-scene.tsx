@@ -225,7 +225,7 @@ function Scene() {
   );
 }
 
-/** Renders the animated backdrop for the selected theme (8bit Classic, Cherry grove, Lush cave, Amethyst room, Chuhahua, Spooky). */
+/** Renders the animated backdrop for the selected theme (8bit Classic, Cherry grove, Lush cave, Amethyst room, Chuhahua, Hollowmere). */
 export function ThemeScene() {
   const theme = useTracker((state) => state.theme);
   if (theme === "mcclassic") return <Scene />;
