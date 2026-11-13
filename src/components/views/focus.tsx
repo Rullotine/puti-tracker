@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pause, Play, RotateCcw, Share2, Square, Volume2 } from "lucide-react";
+import { Pause, Play, RotateCcw, Square, Volume2 } from "lucide-react";
 import { MatrixRain } from "@/components/matrix";
-import { RecapModal } from "@/components/recap-modal";
 import { StreakBoard } from "@/components/streak";
 import { DaySwitcher, Panel, ProgressRing } from "@/components/ui";
 import { AMBIENTS, setAmbient, setAmbientVolume, stopAmbient, type AmbientId } from "@/lib/ambient";
@@ -57,7 +56,6 @@ export function FocusView() {
   const [ambient, setAmbientId] = useState<AmbientId>("off");
   const [volume, setVolume] = useState(0.4);
   const [custom, setCustom] = useState("");
-  const [recapOpen, setRecapOpen] = useState(false);
 
   const quote = useMemo(() => pickQuote(), []);
   const today = todayISO();
@@ -106,11 +104,6 @@ export function FocusView() {
           Work or meditate. Optional ambient sound. A quiet quote for the day.
         </p>
         <p className="mt-2 text-sm italic text-muted/90">“{quote}”</p>
-        <div className="mt-3">
-          <button type="button" className="btn btn-ghost h-9 px-3 text-sm" onClick={() => setRecapOpen(true)}>
-            <Share2 className="size-4" /> Weekly recap card
-          </button>
-        </div>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[1.3fr_0.9fr]">
@@ -270,9 +263,6 @@ export function FocusView() {
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-[11px] leading-relaxed text-muted">
-                🐾 Focus in a scene theme (Cherry grove, Lush cave…) with a sound on and a voxel companion may wander in — it joins your Bestiary.
-              </p>
               {ambient !== "off" ? (
                 <label className="mt-2 grid gap-1 text-xs text-muted">
                   <span className="flex justify-between">
@@ -367,7 +357,6 @@ export function FocusView() {
           )}
         </Panel>
       </div>
-      <RecapModal open={recapOpen} onClose={() => setRecapOpen(false)} />
     </div>
   );
 }

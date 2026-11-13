@@ -1,7 +1,6 @@
 import { defaultNotify, defaultTargets, NUTRIENTS } from "@/lib/nutrients";
 import { isClickStyle } from "@/lib/sounds";
-import { BADGE_ID_SET } from "@/lib/badges";
-import type { Alarm, AlarmTone, CompanionEntry, FocusMeta, Food, Habit, JournalEntry, LiftLog, LiftPlan, Meal, Med, MedMark, Note, Notice, NoticeKind, SleepNight, Snapshot, Task } from "@/lib/types";
+import type { Alarm, AlarmTone, Food, Habit, JournalEntry, LiftLog, LiftPlan, Meal, Med, MedMark, Note, Notice, NoticeKind, SleepNight, Snapshot, Task } from "@/lib/types";
 
 function cryptoRandom() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -313,47 +312,6 @@ export function parseSnapshot(raw: unknown): Snapshot {
     clickEverywhere: soundsRaw.clickEverywhere !== false,
   };
 
-  const bestiary: Record<string, CompanionEntry> = {};
-  const bestiaryRaw = asRecord(root.bestiary) ?? {};
-  for (const [key, value] of Object.entries(bestiaryRaw)) {
-    const item = asRecord(value);
-    if (!item || !/^[a-z0-9-]{1,40}$/.test(key)) continue;
-    const first = typeof item.first === "string" ? item.first.slice(0, 10) : "";
-    if (!first) continue;
-    bestiary[key] = {
-      first,
-      last: typeof item.last === "string" ? item.last.slice(0, 10) : first,
-      visits: clamp(Math.round(Number(item.visits) || 1), 1, 100000),
-    };
-  }
-
-  const badges: Record<string, string> = {};
-  const badgesRaw = asRecord(root.badges) ?? {};
-  for (const [key, value] of Object.entries(badgesRaw)) {
-    if (typeof value === "string" && BADGE_ID_SET.has(key)) badges[key] = value.slice(0, 10);
-  }
-
-  const showcaseBadge =
-    typeof root.showcaseBadge === "string" && BADGE_ID_SET.has(root.showcaseBadge) && badges[root.showcaseBadge]
-      ? root.showcaseBadge
-      : "";
-
-  const metaRaw = asRecord(root.meta) ?? {};
-  const scenesRaw = asRecord(metaRaw.scenes) ?? {};
-  const scenes: Record<string, number> = {};
-  for (const [key, value] of Object.entries(scenesRaw)) {
-    const n = Math.round(Number(value));
-    if (Number.isFinite(n) && n > 0) scenes[key.slice(0, 40)] = clamp(n, 0, 1000000);
-  }
-  const meta: FocusMeta = {
-    sessions: clamp(Math.round(Number(metaRaw.sessions) || 0), 0, 1000000),
-    best: clamp(Math.round(Number(metaRaw.best) || 0), 0, 24 * 60),
-    night: clamp(Math.round(Number(metaRaw.night) || 0), 0, 1000000),
-    early: clamp(Math.round(Number(metaRaw.early) || 0), 0, 1000000),
-    scenes,
-    recaps: clamp(Math.round(Number(metaRaw.recaps) || 0), 0, 1000000),
-  };
-
   return {
     version: 1,
     displayName: typeof root.displayName === "string" ? root.displayName.trim().slice(0, 32) : "",
@@ -381,9 +339,5 @@ export function parseSnapshot(raw: unknown): Snapshot {
     liftPlans,
     journal,
     sounds,
-    bestiary,
-    badges,
-    showcaseBadge,
-    meta,
   };
 }

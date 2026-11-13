@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Copy, LogOut, Volume2, VolumeX } from "lucide-react";
 import { Avatar } from "@/components/avatar";
-import { BadgeChip } from "@/components/badge";
 import { NeedAccount } from "@/components/views/friends";
 import { Panel } from "@/components/ui";
 import { AMBIENTS } from "@/lib/ambient";
@@ -300,14 +299,11 @@ function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onL
               <Avatar username={m.username} name={m.name} src={m.avatar} size={40} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <p className="truncate text-sm font-semibold">
-                      {m.name}
-                      {m.username === me ? <span className="ml-1 text-xs font-normal text-muted">(you)</span> : null}
-                      {m.live ? <span className="ml-2 text-xs font-normal text-primary">🟢 focusing</span> : null}
-                    </p>
-                    <BadgeChip id={m.badge} size={20} />
-                  </div>
+                  <p className="truncate text-sm font-semibold">
+                    {m.name}
+                    {m.username === me ? <span className="ml-1 text-xs font-normal text-muted">(you)</span> : null}
+                    {m.live ? <span className="ml-2 text-xs font-normal text-primary">🟢 focusing</span> : null}
+                  </p>
                   <span className="tabular-nums text-sm">{formatHm(m.minutes)}</span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-ink">
@@ -328,7 +324,7 @@ function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onL
             {addable.map((f) => (
               <li key={f.username}>
                 <button type="button" className="btn btn-ghost h-10 gap-2 px-3 text-sm" onClick={() => void addFriend(f.username)}>
-                  <Avatar username={f.username} name={f.name} src={f.avatar} size={24} /> {f.name} <BadgeChip id={f.badge} size={18} />
+                  <Avatar username={f.username} name={f.name} src={f.avatar} size={24} /> {f.name}
                 </button>
               </li>
             ))}

@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Search, UserMinus, UserPlus, X } from "lucide-react";
 import { Avatar } from "@/components/avatar";
-import { BadgeChip } from "@/components/badge";
 import { CloudPanel } from "@/components/cloud-panel";
 import { Panel } from "@/components/ui";
 import { useCloud } from "@/lib/cloud/sync";
-import { useTracker } from "@/lib/store";
 import { formatHm, todayISO } from "@/lib/dates";
 import {
   fileToAvatar,
@@ -158,10 +156,7 @@ function PersonRow({
     <li className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-ink/60 p-3">
       <Avatar username={p.username} name={p.name} src={p.avatar} size={44} />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <p className="truncate font-semibold">{p.name}</p>
-          <BadgeChip id={p.badge} />
-        </div>
+        <p className="truncate font-semibold">{p.name}</p>
         <p className="truncate text-xs text-muted">
           @{p.username}
           {note ? ` · ${note}` : ""}
@@ -180,7 +175,6 @@ function PersonRow({
 }
 
 function ProfilePanel({ username }: { username: string }) {
-  const showcase = useTracker((state) => state.showcaseBadge);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -244,11 +238,6 @@ function ProfilePanel({ username }: { username: string }) {
         <div className="grid min-w-[14rem] flex-1 gap-2">
           <p className="text-xs text-muted">
             Your username: <span className="font-semibold text-primary">@{username}</span> (friends find you with this)
-          </p>
-          <p className="flex flex-wrap items-center gap-2 text-xs text-muted">
-            Showcase badge:
-            {showcase ? <BadgeChip id={showcase} size={24} /> : <span>none yet</span>}
-            <span className="text-[11px]">— equip one in the Badges tab; friends & groups see it next to your name</span>
           </p>
           <label className="grid gap-1 text-xs font-medium text-muted">
             Display name
