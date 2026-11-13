@@ -4237,7 +4237,7 @@ var SPECIAL_REF_STRING = {
 * design, is not treated as a genuine Stream on re-serialization. Keep the two
 * implementations in sync.
 */
-var Stream = class {
+var Stream$1 = class {
 	constructor() {
 		this.buffer = [];
 		this.listeners = [];
@@ -4302,10 +4302,10 @@ var Stream = class {
 	}
 };
 function isStream(value) {
-	return value instanceof Stream;
+	return value instanceof Stream$1;
 }
 function createStream() {
-	return new Stream();
+	return new Stream$1();
 }
 function createStreamFromAsyncIterable(iterable, cleanups) {
 	const stream = createStream();

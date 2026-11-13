@@ -114,5 +114,11 @@ export function buildSample(today = todayISO()): Snapshot {
     notices: [],
     notify: defaultNotify(),
     fired: {},
+    steps: {},
+    stepGoal: 8000,
+    lifts: [],
+    liftPlans: [],
+    journal: [],
+    sounds: { clicks: true, clickVolume: 0.6, clickStyle: "pop", clickEverywhere: true },
   };
 }

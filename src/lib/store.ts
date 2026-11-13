@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { parseSnapshot } from "@/lib/backup";
+import { computeFocusBonusMinutes } from "@/lib/companions";
 import { todayISO, uid } from "@/lib/dates";
 import { defaultNotify, defaultTargets } from "@/lib/nutrients";
 import { buildSample } from "@/lib/sample";
@@ -16,6 +17,7 @@ type Tracker = Snapshot & {
   sample: boolean;
   timer: TimerState;
   lastAdded: number;
+  lastBonus: number;
   banner: boolean;
   ringingId: string | null;
   loadSample: () => void;
@@ -119,6 +121,7 @@ export const useTracker = create<Tracker>()(
       sample: false,
       timer: DEFAULT_TIMER,
       lastAdded: 0,
+      lastBonus: 0,
       banner: false,
       ringingId: null,
       loadSample: () => {
@@ -135,6 +138,7 @@ export const useTracker = create<Tracker>()(
           sample: false,
           timer: DEFAULT_TIMER,
           lastAdded: 0,
+          lastBonus: 0,
           banner: false,
           ringingId: null,
         });
@@ -326,6 +330,7 @@ export const useTracker = create<Tracker>()(
           focusMinutes: addMinutes(state.focusMinutes, today, mins),
           timer: { status: "idle", totalSec: state.timer.totalSec, leftSec: state.timer.totalSec, endsAt: null },
           lastAdded: mins,
+          lastBonus: 0,
           banner: mins > 0,
         });
         if (mins > 0) get().pushNotice({ kind: "focus", title: "Focus saved", body: `${mins} min added to today.` });
@@ -333,15 +338,24 @@ export const useTracker = create<Tracker>()(
       completeSession: () => {
         const state = get();
         if (state.timer.status !== "running") return;
-        const mins = Math.round(state.timer.totalSec / 60);
+        const baseMins = Math.round(state.timer.totalSec / 60);
+        const bonusMins = computeFocusBonusMinutes(baseMins);
+        const totalMins = baseMins + bonusMins;
         const today = todayISO();
         set({
-          focusMinutes: addMinutes(state.focusMinutes, today, mins),
+          focusMinutes: addMinutes(state.focusMinutes, today, totalMins),
           timer: { status: "idle", totalSec: state.timer.totalSec, leftSec: state.timer.totalSec, endsAt: null },
-          lastAdded: mins,
-          banner: mins > 0,
+          lastAdded: totalMins,
+          lastBonus: bonusMins,
+          banner: totalMins > 0,
         });
-        if (mins > 0) get().pushNotice({ kind: "focus", title: "Focus complete", body: `${mins} min session logged.` });
+        if (totalMins > 0) {
+          get().pushNotice({
+            kind: "focus",
+            title: "Focus complete",
+            body: bonusMins > 0 ? `${baseMins} min + ${bonusMins} min companion bonus logged.` : `${baseMins} min session logged.`,
+          });
+        }
       },
       syncLeft: (left) => {
         const state = get();

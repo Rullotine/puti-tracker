@@ -1,21 +1,42 @@
 import { useCallback, useEffect, useState } from "react";
 import { Copy, LogOut, Volume2, VolumeX } from "lucide-react";
 import { Avatar } from "@/components/avatar";
+import { FocusTimerPanel } from "@/components/focus-timer-panel";
+import type { ViewId } from "@/components/nav";
 import { NeedAccount } from "@/components/views/friends";
 import { Panel } from "@/components/ui";
 import { AMBIENTS } from "@/lib/ambient";
 import { useCloud } from "@/lib/cloud/sync";
+import {
+  VOXEL_COMPANIONS,
+  getVoxelCompanion,
+  resolveProfileCompanionId,
+  useCompanions,
+} from "@/lib/companions";
 import { formatHm, todayISO } from "@/lib/dates";
 import { social, useSocial, type FriendsData, type GroupState, type GroupSummary } from "@/lib/social/client";
 import { cn } from "@/lib/utils";
 
-export function GroupsView() {
+export function GroupsView({ onJump }: { onJump?: (view: ViewId) => void }) {
   const username = useCloud((s) => s.username);
-  if (!username) return <NeedAccount what="Study groups" />;
-  return <GroupsInner username={username} />;
+  if (!username) {
+    return (
+      <div className="flex flex-col gap-4">
+        <header>
+          <h1 className="font-display text-2xl font-semibold">Groups</h1>
+          <p className="mt-1 text-sm text-muted">Study together with a live focus timer, shared sound, and today&apos;s leaderboard.</p>
+        </header>
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <FocusTimerPanel title="Your focus timer" />
+          <NeedAccount what="Study groups" />
+        </div>
+      </div>
+    );
+  }
+  return <GroupsInner username={username} onJump={onJump} />;
 }
 
-function GroupsInner({ username }: { username: string }) {
+function GroupsInner({ username, onJump }: { username: string; onJump?: (view: ViewId) => void }) {
   const [groups, setGroups] = useState<GroupSummary[] | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -65,7 +86,7 @@ function GroupsInner({ username }: { username: string }) {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="font-display text-2xl font-semibold">Groups</h1>
-        <p className="mt-1 text-sm text-muted">Study together: see each other's focus time today and listen to the same ambient sound.</p>
+        <p className="mt-1 text-sm text-muted">Study together: run your focus timer here, track focus time today, and listen to the same ambient sound.</p>
       </header>
 
       {error ? (
@@ -119,9 +140,12 @@ function GroupsInner({ username }: { username: string }) {
       ) : null}
 
       {groups && groups.length === 0 ? (
-        <Panel>
-          <p className="text-sm text-muted">You're not in any group yet. Create one above, or paste an invite code from a friend.</p>
-        </Panel>
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <FocusTimerPanel title="Your focus timer" />
+          <Panel>
+            <p className="text-sm text-muted">You're not in any group yet. Create one above, or paste an invite code from a friend.</p>
+          </Panel>
+        </div>
       ) : null}
 
       {selected ? (
@@ -129,16 +153,34 @@ function GroupsInner({ username }: { username: string }) {
           key={selected}
           groupId={selected}
           me={username}
+          onJump={onJump}
           onLeft={async () => {
             await refresh();
           }}
         />
+      ) : groups === null ? (
+        <FocusTimerPanel title="Your focus timer" />
       ) : null}
     </div>
   );
 }
 
-function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onLeft: () => Promise<void> }) {
+function GroupDetail({
+  groupId,
+  me,
+  onJump,
+  onLeft,
+}: {
+  groupId: string;
+  me: string;
+  onJump?: (view: ViewId) => void;
+  onLeft: () => Promise<void>;
+}) {
+  const unlocked = useCompanions((s) => s.unlocked);
+  const featuredCompanionId = useCompanions((s) => s.featuredCompanionId);
+  const activeCompanionId = useCompanions((s) => s.activeCompanionId);
+  const unlockedCount = VOXEL_COMPANIONS.filter((c) => Boolean(unlocked[c.id])).length;
+  const mySpirit = getVoxelCompanion(resolveProfileCompanionId(unlocked, featuredCompanionId, activeCompanionId));
   const [state, setState] = useState<GroupState | null>(null);
   const [friends, setFriends] = useState<FriendsData["friends"]>([]);
   const [error, setError] = useState("");
@@ -174,11 +216,15 @@ function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onL
     const res = await social("groupSetAmbient", { groupId, ambient: id });
     if (!res.ok) return setError(res.error);
     // The person who picks a sound should hear it too (this click is also what lets the browser start audio).
-    if (id !== "off") useSocial.getState().setListening(groupId);
+    if (id !== "off") {
+      useCompanions.getState().setAmbientChoice("off");
+      useSocial.getState().setListening(groupId);
+    }
     await load();
   }
 
   function toggleListening() {
+    if (!listening) useCompanions.getState().setAmbientChoice("off");
     useSocial.getState().setListening(listening ? null : groupId);
   }
 
@@ -209,9 +255,12 @@ function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onL
 
   if (!state) {
     return (
-      <Panel>
-        <p className="text-sm text-muted">{error || "Loading group…"}</p>
-      </Panel>
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <FocusTimerPanel title="Your focus timer" />
+        <Panel>
+          <p className="text-sm text-muted">{error || "Loading group…"}</p>
+        </Panel>
+      </div>
     );
   }
 
@@ -248,73 +297,93 @@ function GroupDetail({ groupId, me, onLeft }: { groupId: string; me: string; onL
         </div>
       </Panel>
 
-      <Panel title="Group sound">
-        <p className="text-sm text-muted">
-          Pick a sound and everyone who taps “Listen along” hears it too.
-          {state.ambient.by ? (
-            <>
-              {" "}
-              Now: <span className="text-fg">{soundLabel}</span>
-              {state.ambient.id !== "off" ? <> (set by @{state.ambient.by})</> : null}
-            </>
-          ) : null}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {AMBIENTS.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              className={cn("btn btn-ghost h-8 px-2.5 text-xs", state.ambient.id === a.id && "bg-primary/15 text-primary")}
-              onClick={() => void chooseSound(a.id)}
-            >
-              {a.label}
-            </button>
-          ))}
-        </div>
-        {soundMissing ? <p className="mt-2 text-xs text-muted">This sound isn't available on this device's version of the app.</p> : null}
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <button type="button" className={cn("btn", listening ? "btn-ghost" : "btn-primary")} onClick={toggleListening}>
-            {listening ? (
-              <>
-                <VolumeX className="size-4" /> Stop listening
-              </>
-            ) : (
-              <>
-                <Volume2 className="size-4" /> Listen along
-              </>
-            )}
-          </button>
-          <label className="flex items-center gap-2 text-xs text-muted">
-            Volume
-            <input type="range" min={0.05} max={1} step={0.05} value={volume} onChange={(e) => useSocial.getState().setVolume(Number(e.target.value))} />
-            <span className="w-9 tabular-nums text-fg">{Math.round(volume * 100)}%</span>
-          </label>
-        </div>
-      </Panel>
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <FocusTimerPanel
+          title="Your focus timer"
+          groupAmbientId={listening ? state.ambient.id : undefined}
+        />
 
-      <Panel title="Focus today">
-        <ul className="flex flex-col gap-3">
-          {state.members.map((m) => (
-            <li key={m.username} className="flex items-center gap-3">
-              <Avatar username={m.username} name={m.name} src={m.avatar} size={40} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="truncate text-sm font-semibold">
-                    {m.name}
-                    {m.username === me ? <span className="ml-1 text-xs font-normal text-muted">(you)</span> : null}
-                    {m.live ? <span className="ml-2 text-xs font-normal text-primary">🟢 focusing</span> : null}
-                  </p>
-                  <span className="tabular-nums text-sm">{formatHm(m.minutes)}</span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-ink">
-                  <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(m.minutes / top) * 100}%` }} />
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-muted">Minutes count once a focus session ends or is stopped. Updates every few seconds.</p>
-      </Panel>
+        <div className="flex flex-col gap-4">
+          <Panel title="Group sound">
+            <p className="text-sm text-muted">
+              Pick a sound and everyone who taps “Listen along” hears it too.
+              {state.ambient.by ? (
+                <>
+                  {" "}
+                  Now: <span className="text-fg">{soundLabel}</span>
+                  {state.ambient.id !== "off" ? <> (set by @{state.ambient.by})</> : null}
+                </>
+              ) : null}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {AMBIENTS.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className={cn("btn btn-ghost h-8 px-2.5 text-xs", state.ambient.id === a.id && "bg-primary/15 text-primary")}
+                  onClick={() => void chooseSound(a.id)}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+            {soundMissing ? <p className="mt-2 text-xs text-muted">This sound isn't available on this device's version of the app.</p> : null}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button type="button" className={cn("btn", listening ? "btn-ghost" : "btn-primary")} onClick={toggleListening}>
+                {listening ? (
+                  <>
+                    <VolumeX className="size-4" /> Stop listening
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="size-4" /> Listen along
+                  </>
+                )}
+              </button>
+              <label className="flex items-center gap-2 text-xs text-muted">
+                Volume
+                <input type="range" min={0.05} max={1} step={0.05} value={volume} onChange={(e) => useSocial.getState().setVolume(Number(e.target.value))} />
+                <span className="w-9 tabular-nums text-fg">{Math.round(volume * 100)}%</span>
+              </label>
+            </div>
+          </Panel>
+
+          <Panel title="Focus today">
+            <ul className="flex flex-col gap-3">
+              {state.members.map((m) => (
+                <li key={m.username} className="flex items-center gap-3">
+                  <Avatar username={m.username} name={m.name} src={m.avatar} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="truncate text-sm font-semibold">
+                        {m.name}
+                        {m.username === me ? <span className="ml-1 text-xs font-normal text-muted">(you)</span> : null}
+                        {m.username === me ? (
+                          <button
+                            type="button"
+                            onClick={() => onJump?.("bestiary")}
+                            className="ml-2 inline-flex items-center rounded border border-line bg-ink px-1.5 py-0.5 text-[11px] font-medium text-primary hover:border-primary/60"
+                            title="Open Bestiary"
+                          >
+                            {mySpirit ? `${mySpirit.name} · ` : ""}
+                            {unlockedCount}/{VOXEL_COMPANIONS.length}
+                          </button>
+                        ) : null}
+                        {m.live ? <span className="ml-2 text-xs font-normal text-primary">🟢 focusing</span> : null}
+                      </p>
+                      <span className="tabular-nums text-sm">{formatHm(m.minutes)}</span>
+                    </div>
+                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-ink">
+                      <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(m.minutes / top) * 100}%` }} />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-muted">Minutes count once a focus session ends or is stopped. Updates every few seconds.</p>
+          </Panel>
+        </div>
+      </div>
 
       <Panel title="Add a friend to this group">
         {addable.length === 0 ? (

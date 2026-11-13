@@ -40,15 +40,23 @@ export async function social<T = Json>(op: string, args: Record<string, Json> = 
 
 type SocialState = {
   listeningGroupId: string | null;
+  listeningAmbientId: string;
   volume: number;
   setListening: (groupId: string | null) => void;
+  setListeningAmbient: (ambientId: string) => void;
   setVolume: (volume: number) => void;
 };
 
 export const useSocial = create<SocialState>((set) => ({
   listeningGroupId: null,
+  listeningAmbientId: "off",
   volume: 0.4,
-  setListening: (listeningGroupId) => set({ listeningGroupId }),
+  setListening: (listeningGroupId) =>
+    set((s) => ({
+      listeningGroupId,
+      listeningAmbientId: listeningGroupId ? s.listeningAmbientId : "off",
+    })),
+  setListeningAmbient: (listeningAmbientId) => set({ listeningAmbientId }),
   setVolume: (volume) => set({ volume }),
 }));
 

@@ -4,6 +4,7 @@ import { NUTRIENTS } from "@/lib/nutrients";
 import { focusStreak } from "@/lib/stats";
 import { useTracker } from "@/lib/store";
 import type { ViewId } from "@/components/nav";
+import { ProfileBestiaryBadge } from "@/components/profile-bestiary";
 import { Panel } from "@/components/ui";
 
 function initials(name: string) {
@@ -96,14 +97,17 @@ export function TodayView({ onJump }: { onJump: (view: ViewId) => void }) {
         </div>
       </Panel>
 
-      <header className="flex items-center gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-full bg-primary font-display text-sm font-semibold text-on-primary">
-          {initials(displayName)}
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary font-display text-sm font-semibold text-on-primary">
+            {initials(displayName)}
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-semibold tracking-tight">{displayName || "Your desk"}</h1>
+            <p className="text-sm text-muted">{formatLong(today)}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">{displayName || "Your desk"}</h1>
-          <p className="text-sm text-muted">{formatLong(today)}</p>
-        </div>
+        <ProfileBestiaryBadge onJump={onJump} />
       </header>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

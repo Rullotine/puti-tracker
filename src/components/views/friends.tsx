@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Search, UserMinus, UserPlus, X } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { CloudPanel } from "@/components/cloud-panel";
+import type { ViewId } from "@/components/nav";
+import { ProfileBestiaryBadge, ProfileBestiaryCard } from "@/components/profile-bestiary";
 import { Panel } from "@/components/ui";
 import { useCloud } from "@/lib/cloud/sync";
 import { formatHm, todayISO } from "@/lib/dates";
@@ -27,13 +29,24 @@ export function NeedAccount({ what }: { what: string }) {
   );
 }
 
-export function FriendsView() {
+export function FriendsView({ onJump }: { onJump?: (view: ViewId) => void }) {
   const username = useCloud((s) => s.username);
-  if (!username) return <NeedAccount what="Friends and profiles" />;
-  return <FriendsInner username={username} />;
+  if (!username) {
+    return (
+      <div className="flex flex-col gap-4">
+        <header>
+          <h1 className="font-display text-2xl font-semibold">Profile & Friends</h1>
+          <p className="mt-1 text-sm text-muted">Customize your local Bestiary profile showcase, or sign in to sync your profile and add friends.</p>
+        </header>
+        <ProfileBestiaryCard onJump={onJump} />
+        <NeedAccount what="Friends and social profiles" />
+      </div>
+    );
+  }
+  return <FriendsInner username={username} onJump={onJump} />;
 }
 
-function FriendsInner({ username }: { username: string }) {
+function FriendsInner({ username, onJump }: { username: string; onJump?: (view: ViewId) => void }) {
   const [data, setData] = useState<FriendsData | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -78,7 +91,8 @@ function FriendsInner({ username }: { username: string }) {
       ) : null}
       {notice ? <p className="text-sm text-primary">{notice}</p> : null}
 
-      <ProfilePanel username={username} />
+      <ProfilePanel username={username} onJump={onJump} />
+      <ProfileBestiaryCard username={username} onJump={onJump} />
       <AddFriends onChanged={refresh} act={act} />
 
       {data && (data.incoming.length > 0 || data.outgoing.length > 0) ? (
@@ -174,7 +188,7 @@ function PersonRow({
   );
 }
 
-function ProfilePanel({ username }: { username: string }) {
+function ProfilePanel({ username, onJump }: { username: string; onJump?: (view: ViewId) => void }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -221,7 +235,7 @@ function ProfilePanel({ username }: { username: string }) {
   const dirty = !profile || name !== profile.name || bio !== profile.bio || avatar !== profile.avatar;
 
   return (
-    <Panel title="My profile">
+    <Panel title="My profile" action={<ProfileBestiaryBadge onJump={onJump} compact />}>
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex flex-col items-center gap-2">
           <Avatar username={username} name={name} src={avatar} size={96} />

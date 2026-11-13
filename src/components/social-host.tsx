@@ -44,6 +44,7 @@ export function SocialHost() {
       const wanted = res.data.id;
       if (key !== applied || (wanted !== "off" && !isAmbientPlaying())) {
         applied = key;
+        useSocial.getState().setListeningAmbient(wanted);
         if (wanted === "off") stopAmbient();
         else setAmbient(wanted, useSocial.getState().volume);
       }
@@ -53,6 +54,7 @@ export function SocialHost() {
     return () => {
       alive = false;
       window.clearInterval(id);
+      useSocial.getState().setListeningAmbient("off");
       stopAmbient();
     };
   }, [username, listening]);

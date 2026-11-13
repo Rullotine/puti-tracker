@@ -1,4 +1,6 @@
 import { useState } from "react";
+import type { ViewId } from "@/components/nav";
+import { ProfileBestiaryBadge } from "@/components/profile-bestiary";
 import { Panel } from "@/components/ui";
 import { useTracker } from "@/lib/store";
 import { playClick, CLICK_STYLES, DEFAULT_CLICK_STYLE, isClickStyle } from "@/lib/sounds";
@@ -16,7 +18,7 @@ const TAGS: Record<string, string> = {
   spooky: "animated · disturbing",
 };
 
-export function ThemesView() {
+export function ThemesView({ onJump }: { onJump?: (view: ViewId) => void }) {
   const theme = useTracker((state) => state.theme);
   const setTheme = useTracker((state) => state.setTheme);
   const displayName = useTracker((state) => state.displayName);
@@ -51,6 +53,10 @@ export function ThemesView() {
           <button className="btn btn-primary" type="submit" disabled={!name.trim()}>Save name</button>
         </form>
         <p className="mt-2 text-sm text-muted">ks2v stays in the corner as the builder. This name is yours.</p>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+          <span className="text-xs font-medium text-muted">Profile Bestiary</span>
+          <ProfileBestiaryBadge onJump={onJump} compact />
+        </div>
       </Panel>
       {findTheme(theme).id === "spooky" ? <SpookyBadges /> : null}
       <ThemeGrid title="Dark" items={darks} current={findTheme(theme).id} onPick={setTheme} />
