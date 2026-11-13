@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { Share2 } from "lucide-react";
 import { PercentChart, TrendChart } from "@/components/charts";
+import { RecapModal } from "@/components/recap-modal";
 import { Panel } from "@/components/ui";
 import { lastNDays, todayISO } from "@/lib/dates";
 import { calorieSeries, focusSeries, habitDaily, medDaily, patternNotes, sleepSeries } from "@/lib/stats";
@@ -6,6 +9,7 @@ import { useTracker } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export function InsightsView() {
+  const [recapOpen, setRecapOpen] = useState(false);
   const habits = useTracker((state) => state.habits);
   const checks = useTracker((state) => state.checks);
   const sleep = useTracker((state) => state.sleep);
@@ -36,6 +40,11 @@ export function InsightsView() {
       <header>
         <h1 className="font-display text-2xl font-semibold">Patterns</h1>
         <p className="mt-1 text-sm text-muted">Fourteen days of sleep, habits, focus, medicine, and food, read from what you logged.</p>
+        <div className="mt-3">
+          <button type="button" className="btn btn-ghost h-9 px-3 text-sm" onClick={() => setRecapOpen(true)}>
+            <Share2 className="size-4" /> Share a voxel recap
+          </button>
+        </div>
       </header>
       {notes.length > 0 ? (
         <Panel title="What stands out">
@@ -82,6 +91,7 @@ export function InsightsView() {
       <Panel title="Medicine doses">
         <PercentChart data={medDaily(meds, medTicks, days)} />
       </Panel>
+      <RecapModal open={recapOpen} onClose={() => setRecapOpen(false)} />
     </div>
   );
 }

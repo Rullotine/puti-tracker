@@ -1,16 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, type ComponentType } from "react";
-import { Splash } from "@/components/splash";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute('/')({
+  component: RouteComponent,
+})
 
-function Home() {
-  const [App, setApp] = useState<ComponentType | null>(null);
-
-  useEffect(() => {
-    void import("@/components/app-shell").then((mod) => setApp(() => mod.AppShell));
-  }, []);
-
-  if (!App) return <Splash />;
-  return <App />;
+function RouteComponent() {
+  return <div>Hello "/"!</div>
 }

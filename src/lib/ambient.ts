@@ -79,6 +79,7 @@ type Active = {
 
 let sharedCtx: AudioContext | null = null;
 let active: Active | null = null;
+let activeId: AmbientId = "off";
 let token = 0;
 const bufferCache = new Map<string, AudioBuffer>();
 const fileCache = new Map<string, AudioBuffer>();
@@ -769,6 +770,7 @@ export function setAmbient(id: AmbientId, volume = 0.35) {
     s.start();
   };
 
+  activeId = id;
   active = {
     ctx,
     master,
@@ -824,8 +826,14 @@ export function stopAmbient() {
     active.stop();
     active = null;
   }
+  activeId = "off";
 }
 
 export function isAmbientPlaying() {
   return active != null;
+}
+
+/** Id of the ambient sound currently playing ("off" when silent). Used by the companion spawner. */
+export function currentAmbientId(): AmbientId {
+  return active ? activeId : "off";
 }

@@ -99,6 +99,25 @@ export type SoundPrefs = {
   clickEverywhere?: boolean;
 };
 
+/** A companion that has visited: first/last visit dates and visit count. */
+export type CompanionEntry = { first: string; last: string; visits: number };
+
+/** Small counters that back badges and the recap card. */
+export type FocusMeta = {
+  /** Sessions completed or ended with time saved. */
+  sessions: number;
+  /** Longest single session, in minutes. */
+  best: number;
+  /** Sessions ended between 00:00 and 04:00. */
+  night: number;
+  /** Sessions ended between 05:00 and 07:00. */
+  early: number;
+  /** Sessions completed per scene theme id. */
+  scenes: Record<string, number>;
+  /** Recap cards downloaded or shared. */
+  recaps: number;
+};
+
 export type Snapshot = {
   version: 1;
   displayName: string;
@@ -126,6 +145,13 @@ export type Snapshot = {
   liftPlans: LiftPlan[];
   journal: JournalEntry[];
   sounds: SoundPrefs;
+  /** Voxel companions discovered while focusing (id -> entry). */
+  bestiary: Record<string, CompanionEntry>;
+  /** Earned badges (id -> ISO date earned). */
+  badges: Record<string, string>;
+  /** Badge shown next to your profile ("" = none). */
+  showcaseBadge: string;
+  meta: FocusMeta;
 };
 
 export const MEALS: { id: Meal; label: string }[] = [

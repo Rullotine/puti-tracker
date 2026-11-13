@@ -114,5 +114,9 @@ export function buildSample(today = todayISO()): Snapshot {
     notices: [],
     notify: defaultNotify(),
     fired: {},
+    bestiary: {},
+    badges: {},
+    showcaseBadge: "",
+    meta: { sessions: 0, best: 0, night: 0, early: 0, scenes: {}, recaps: 0 },
   };
 }

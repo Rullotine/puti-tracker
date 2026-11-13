@@ -4,8 +4,10 @@ import { parseSnapshot } from "@/lib/backup";
 import { todayISO, uid } from "@/lib/dates";
 import { defaultNotify, defaultTargets } from "@/lib/nutrients";
 import { buildSample } from "@/lib/sample";
-import type { Alarm, Food, Habit, JournalEntry, LiftLog, LiftPlan, LiftSet, Meal, Med, Note, NoticeKind, SleepNight, Snapshot, SoundPrefs, Task, TimerState } from "@/lib/types";
+import type { Alarm, CompanionEntry, FocusMeta, Food, Habit, JournalEntry, LiftLog, LiftPlan, LiftSet, Meal, Med, Note, NoticeKind, SleepNight, Snapshot, SoundPrefs, Task, TimerState } from "@/lib/types";
 import { clamp } from "@/lib/utils";
+import { BADGE_MAP, evaluateBadges } from "@/lib/badges";
+import { isSceneTheme } from "@/lib/companions";
 
 /** Longest single focus session, in minutes (matches the 12h daily-goal cap). */
 export const MAX_SESSION_MIN = 720;
@@ -76,7 +78,33 @@ type Tracker = Snapshot & {
   removeLiftPlan: (id: string) => void;
   saveJournal: (date: string, mood: number, body: string) => void;
   removeJournal: (id: string) => void;
+  /** Log a companion visit into the Bestiary (called by the companion host). */
+  collectCompanion: (id: string) => void;
+  /** Recompute earned badges from current data; announce new ones. */
+  awardBadges: () => void;
+  /** Equip (or unequip) the badge shown next to your profile. */
+  setShowcaseBadge: (id: string) => void;
+  /** Count a downloaded/shared recap card. */
+  noteRecapShare: () => void;
 };
+
+const emptyMeta = (): FocusMeta => ({ sessions: 0, best: 0, night: 0, early: 0, scenes: {}, recaps: 0 });
+
+/** Fold a finished session into the badge/recap counters. */
+function bumpMeta(meta: FocusMeta, mins: number, theme: string): FocusMeta {
+  if (mins <= 0) return meta;
+  const hour = new Date().getHours();
+  const scenes = { ...meta.scenes };
+  if (isSceneTheme(theme)) scenes[theme] = (scenes[theme] ?? 0) + 1;
+  return {
+    sessions: meta.sessions + 1,
+    best: Math.max(meta.best, mins),
+    night: meta.night + (hour < 4 ? 1 : 0),
+    early: meta.early + (hour >= 5 && hour < 7 ? 1 : 0),
+    scenes,
+    recaps: meta.recaps,
+  };
+}
 
 const emptySnapshot = (): Snapshot => ({
   version: 1,
@@ -105,6 +133,10 @@ const emptySnapshot = (): Snapshot => ({
   liftPlans: [],
   journal: [],
   sounds: { clicks: true, clickVolume: 0.6, clickStyle: "pop", clickEverywhere: true },
+  bestiary: {},
+  badges: {},
+  showcaseBadge: "",
+  meta: emptyMeta(),
 });
 
 function addMinutes(map: Record<string, number>, date: string, mins: number) {
@@ -173,6 +205,10 @@ export const useTracker = create<Tracker>()(
           liftPlans: state.liftPlans,
           journal: state.journal,
           sounds: state.sounds,
+          bestiary: state.bestiary,
+          badges: state.badges,
+          showcaseBadge: state.showcaseBadge,
+          meta: state.meta,
         };
       },
       setDisplayName: (name) => {
@@ -200,14 +236,16 @@ export const useTracker = create<Tracker>()(
           for (const key of Object.keys(checks)) if (key.startsWith(`${id}|`)) delete checks[key];
           return { habits: state.habits.filter((habit) => habit.id !== id), checks };
         }),
-      toggleHabit: (id, date) =>
+      toggleHabit: (id, date) => {
         set((state) => {
           const key = `${id}|${date}`;
           const checks = { ...state.checks };
           if (checks[key]) delete checks[key];
           else checks[key] = true;
           return { checks };
-        }),
+        });
+        get().awardBadges();
+      },
       saveSleep: (night) =>
         set((state) => ({
           sleep: [...state.sleep.filter((item) => item.date !== night.date), night].sort((a, b) =>
@@ -324,11 +362,15 @@ export const useTracker = create<Tracker>()(
         const today = todayISO();
         set({
           focusMinutes: addMinutes(state.focusMinutes, today, mins),
+          meta: bumpMeta(state.meta, mins, state.theme),
           timer: { status: "idle", totalSec: state.timer.totalSec, leftSec: state.timer.totalSec, endsAt: null },
           lastAdded: mins,
           banner: mins > 0,
         });
-        if (mins > 0) get().pushNotice({ kind: "focus", title: "Focus saved", body: `${mins} min added to today.` });
+        if (mins > 0) {
+          get().pushNotice({ kind: "focus", title: "Focus saved", body: `${mins} min added to today.` });
+          get().awardBadges();
+        }
       },
       completeSession: () => {
         const state = get();
@@ -337,11 +379,15 @@ export const useTracker = create<Tracker>()(
         const today = todayISO();
         set({
           focusMinutes: addMinutes(state.focusMinutes, today, mins),
+          meta: bumpMeta(state.meta, mins, state.theme),
           timer: { status: "idle", totalSec: state.timer.totalSec, leftSec: state.timer.totalSec, endsAt: null },
           lastAdded: mins,
           banner: mins > 0,
         });
-        if (mins > 0) get().pushNotice({ kind: "focus", title: "Focus complete", body: `${mins} min session logged.` });
+        if (mins > 0) {
+          get().pushNotice({ kind: "focus", title: "Focus complete", body: `${mins} min session logged.` });
+          get().awardBadges();
+        }
       },
       syncLeft: (left) => {
         const state = get();
@@ -473,6 +519,7 @@ export const useTracker = create<Tracker>()(
           note: (input.note ?? "").trim().slice(0, 200),
         };
         set((state) => ({ lifts: [log, ...state.lifts].slice(0, 400) }));
+        get().awardBadges();
       },
       removeLift: (id) => set((state) => ({ lifts: state.lifts.filter((l) => l.id !== id) })),
       addLiftPlan: (exercise, weekday) => {
@@ -508,6 +555,51 @@ export const useTracker = create<Tracker>()(
       removeJournal: (id) => set((state) => ({ journal: state.journal.filter((j) => j.id !== id) })),
       setNotify: (patch) => set((state) => ({ notify: { ...state.notify, ...patch } })),
       markFired: (key, day) => set((state) => ({ fired: { ...state.fired, [key]: day } })),
+      collectCompanion: (id) => {
+        const today = todayISO();
+        set((state) => {
+          const prev = state.bestiary[id];
+          const entry: CompanionEntry = prev
+            ? { ...prev, last: today, visits: prev.visits + 1 }
+            : { first: today, last: today, visits: 1 };
+          return { bestiary: { ...state.bestiary, [id]: entry } };
+        });
+        get().awardBadges();
+      },
+      awardBadges: () => {
+        const state = get();
+        const earned = evaluateBadges({
+          focusMinutes: state.focusMinutes,
+          goalHours: state.goalHours,
+          habits: state.habits,
+          checks: state.checks,
+          lifts: state.lifts,
+          bestiary: state.bestiary,
+          meta: state.meta,
+          today: todayISO(),
+        });
+        const fresh = earned.filter((id) => !state.badges[id]);
+        if (fresh.length === 0) return;
+        const today = todayISO();
+        set((s) => {
+          const badges = { ...s.badges };
+          for (const id of fresh) badges[id] = today;
+          return { badges };
+        });
+        for (const id of fresh) {
+          const def = BADGE_MAP[id];
+          if (def) get().pushNotice({ kind: "system", title: `Badge earned — ${def.name}`, body: def.description });
+        }
+      },
+      setShowcaseBadge: (id) => {
+        const state = get();
+        if (id && !state.badges[id]) return;
+        set({ showcaseBadge: state.showcaseBadge === id ? "" : id });
+      },
+      noteRecapShare: () => {
+        set((state) => ({ meta: { ...state.meta, recaps: state.meta.recaps + 1 } }));
+        get().awardBadges();
+      },
     }),
     {
       name: "puti-tracker",
@@ -541,6 +633,10 @@ export const useTracker = create<Tracker>()(
         liftPlans: state.liftPlans,
         journal: state.journal,
         sounds: state.sounds,
+        bestiary: state.bestiary,
+        badges: state.badges,
+        showcaseBadge: state.showcaseBadge,
+        meta: state.meta,
       }),
     },
   ),

@@ -1,6 +1,7 @@
 import {
   AlarmClock,
   Apple,
+  Award,
   BarChart3,
   Bell,
   BookOpen,
@@ -10,6 +11,7 @@ import {
   Moon,
   NotebookPen,
   Palette,
+  PawPrint,
   Pill,
   Timer,
   UserPlus,
@@ -24,6 +26,7 @@ export type ViewId =
   | "sleep"
   | "medicine"
   | "focus"
+  | "bestiary"
   | "lifts"
   | "calories"
   | "nutrients"
@@ -34,6 +37,7 @@ export type ViewId =
   | "insights"
   | "friends"
   | "groups"
+  | "badges"
   | "themes";
 
 export const VIEWS: { id: ViewId; label: string; icon: LucideIcon }[] = [
@@ -42,6 +46,7 @@ export const VIEWS: { id: ViewId; label: string; icon: LucideIcon }[] = [
   { id: "sleep", label: "Sleep", icon: Moon },
   { id: "medicine", label: "Medicine", icon: Pill },
   { id: "focus", label: "Focus", icon: Timer },
+  { id: "bestiary", label: "Bestiary", icon: PawPrint },
   { id: "lifts", label: "Lifts", icon: Dumbbell },
   { id: "calories", label: "Calories", icon: Utensils },
   { id: "nutrients", label: "Nutrients", icon: Apple },
@@ -52,5 +57,6 @@ export const VIEWS: { id: ViewId; label: string; icon: LucideIcon }[] = [
   { id: "insights", label: "Insights", icon: BarChart3 },
   { id: "friends", label: "Friends", icon: UserPlus },
   { id: "groups", label: "Groups", icon: Users },
+  { id: "badges", label: "Badges", icon: Award },
   { id: "themes", label: "Themes", icon: Palette },
 ];

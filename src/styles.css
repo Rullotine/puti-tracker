@@ -1501,3 +1501,143 @@ html[data-theme="spooky"] .field:focus {
   html[data-theme="spooky"] body::after,
   html[data-theme="spooky"] main h1 { animation: none; }
 }
+
+
+/* ------------------------------------------------------------------ */
+/* Voxel Companions, Bestiary, Badges, Recap (added in v9)             */
+/* ------------------------------------------------------------------ */
+
+/* Companion visitor layer: above the scene backdrop, below the app UI. */
+.companion-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.companion-walk {
+  position: absolute;
+  bottom: 4vh;
+  animation: companion-walk-in 9s ease-out both;
+}
+@keyframes companion-walk-in {
+  from { transform: translateX(var(--walk-from, -110vw)); }
+  to { transform: translateX(0); }
+}
+.companion-leave {
+  animation: companion-fade-out 1.1s ease-in both;
+}
+@keyframes companion-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.companion-btn {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.companion-bob {
+  display: block;
+  animation: companion-bob 1.6s ease-in-out infinite;
+}
+@keyframes companion-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.companion-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 9999px;
+  filter: blur(6px);
+}
+.companion-heart {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  font-size: 18px;
+  color: #fb7185;
+  opacity: 0;
+  animation: companion-heart 1s ease-out both;
+}
+@keyframes companion-heart {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -28px); }
+}
+.companion-tag {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.companion-btn:hover .companion-tag,
+.companion-btn:focus-visible .companion-tag {
+  opacity: 1;
+}
+
+/* Badge chip shown next to profile names; hover/focus reveals the story. */
+.badge-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1.5px solid;
+  background: color-mix(in oklab, currentColor 12%, transparent);
+  vertical-align: middle;
+  cursor: help;
+  outline: none;
+}
+.badge-chip-icon {
+  width: 62%;
+  height: 62%;
+}
+.badge-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 232px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.badge-chip:hover .badge-tip,
+.badge-chip:focus-visible .badge-tip {
+  opacity: 1;
+}
+.badge-medallion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 2px solid;
+}

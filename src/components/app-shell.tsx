@@ -8,6 +8,10 @@ import { AlarmsView } from "@/components/views/alarms";
 import { AlertsView } from "@/components/views/alerts";
 import { CaloriesView } from "@/components/views/calories";
 import { FocusView } from "@/components/views/focus";
+import { BestiaryView } from "@/components/views/bestiary";
+import { BadgesView } from "@/components/views/badges";
+import { CompanionHost } from "@/components/companion-host";
+import { BadgeSyncHost } from "@/components/badge-sync-host";
 import { FriendsView } from "@/components/views/friends";
 import { GroupsView } from "@/components/views/groups";
 import { JournalView } from "@/components/views/journal";
@@ -49,6 +53,8 @@ export function AppShell() {
         else if (state.timer.status === "running" && state.timer.endsAt != null && state.timer.endsAt <= Date.now()) {
           state.completeSession();
         }
+        // Award any badges earned from data logged before badges existed.
+        state.awardBadges();
         startCloudSync();
         await boot;
       } finally {
@@ -69,8 +75,10 @@ export function AppShell() {
       <ThemeSync />
       <ClickSoundHost />
       <ThemeScene />
+      <CompanionHost />
       <SocialHost />
-      <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-4 border-r border-line px-3 py-5 md:flex">
+      <BadgeSyncHost />
+      <aside className="sticky top-0 z-10 hidden h-dvh w-56 shrink-0 flex-col gap-4 border-r border-line px-3 py-5 md:flex">
         <Brand onAlerts={() => setView("alerts")} />
         <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto" aria-label="Sections">
           {VIEWS.map((item) => (
@@ -79,7 +87,7 @@ export function AppShell() {
         </nav>
         <p className="text-xs text-muted">Built by ks2v</p>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 border-b border-line bg-bg/80 px-4 py-3 backdrop-blur md:hidden">
           <Brand onAlerts={() => setView("alerts")} />
           <nav className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Sections">
@@ -96,6 +104,7 @@ export function AppShell() {
           {view === "sleep" ? <SleepView /> : null}
           {view === "medicine" ? <MedicineView /> : null}
           {view === "focus" ? <FocusView /> : null}
+          {view === "bestiary" ? <BestiaryView /> : null}
           {view === "lifts" ? <LiftsView /> : null}
           {view === "calories" ? <CaloriesView /> : null}
           {view === "nutrients" ? <NutrientsView /> : null}
@@ -106,6 +115,7 @@ export function AppShell() {
           {view === "insights" ? <InsightsView /> : null}
           {view === "friends" ? <FriendsView /> : null}
           {view === "groups" ? <GroupsView /> : null}
+          {view === "badges" ? <BadgesView /> : null}
           {view === "themes" ? <ThemesView /> : null}
           <DataTools />
         </main>
