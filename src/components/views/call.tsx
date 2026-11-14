@@ -44,6 +44,98 @@ function makeCode() {
 }
 const cleanCode = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
 
+let sharedAudioCtx: AudioContext | null = null;
+function getAudioCtx(): AudioContext | null {
+  try {
+    if (!sharedAudioCtx) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) return null;
+      sharedAudioCtx = new AC();
+    }
+    if (sharedAudioCtx.state === "suspended") void sharedAudioCtx.resume().catch(() => undefined);
+    return sharedAudioCtx;
+  } catch {
+    return null;
+  }
+}
+
+/** True while the audio in `stream` is loud enough to be someone talking. */
+function useSpeaking(stream: MediaStream | null | undefined): boolean {
+  const [speaking, setSpeaking] = useState(false);
+
+  useEffect(() => {
+    setSpeaking(false);
+    if (!stream) return;
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+
+    let source: MediaStreamAudioSourceNode | null = null;
+    let analyser: AnalyserNode | null = null;
+    let buf: Uint8Array | null = null;
+    let lastLoud = 0;
+    let on = false;
+
+    const disconnect = () => {
+      try {
+        source?.disconnect();
+      } catch {
+        // ignore
+      }
+      source = null;
+      analyser = null;
+      buf = null;
+    };
+
+    const connect = () => {
+      disconnect();
+      const track = stream.getAudioTracks()[0];
+      if (!track) return;
+      try {
+        source = ctx.createMediaStreamSource(new MediaStream([track]));
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser); // measured only: not connected to speakers
+        buf = new Uint8Array(analyser.fftSize);
+      } catch {
+        disconnect();
+      }
+    };
+
+    connect();
+    stream.addEventListener("addtrack", connect);
+    stream.addEventListener("removetrack", connect);
+
+    const timer = window.setInterval(() => {
+      if (!analyser || !buf) return;
+      analyser.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = (buf[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / buf.length);
+      const now = performance.now();
+      if (rms > 0.03) lastLoud = now;
+      const next = now - lastLoud < 350; // stay lit briefly between words
+      if (next !== on) {
+        on = next;
+        setSpeaking(next);
+      }
+    }, 80);
+
+    return () => {
+      window.clearInterval(timer);
+      stream.removeEventListener("addtrack", connect);
+      stream.removeEventListener("removetrack", connect);
+      disconnect();
+      setSpeaking(false);
+    };
+  }, [stream]);
+
+  return speaking;
+}
+
 function VideoTile({
   stream,
   label,
@@ -53,6 +145,7 @@ function VideoTile({
   large = false,
   fit = "cover",
   className,
+  detectSpeech = false,
   showVideo = true,
   micOff = false,
   note,
@@ -65,6 +158,7 @@ function VideoTile({
   large?: boolean;
   fit?: "cover" | "contain";
   className?: string;
+  detectSpeech?: boolean;
   showVideo?: boolean;
   micOff?: boolean;
   note?: string;
@@ -74,6 +168,7 @@ function VideoTile({
   const [blocked, setBlocked] = useState(false);
   const tileRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
+  const speaking = useSpeaking(detectSpeech ? stream : null);
 
   useEffect(() => {
     const onChange = () => setIsFs(document.fullscreenElement === tileRef.current);
@@ -131,8 +226,17 @@ function VideoTile({
     <div
       ref={tileRef}
       onDoubleClick={toggleFullscreen}
+      style={
+        speaking
+          ? {
+              boxShadow: isFs
+                ? "inset 0 0 0 5px #34d399"
+                : "0 0 0 3px #34d399, 0 0 16px 2px rgba(52,211,153,0.55)",
+            }
+          : undefined
+      }
       className={cn(
-        "relative overflow-hidden bg-bg/80",
+        "relative overflow-hidden bg-bg/80 transition-shadow duration-150",
         isFs ? "h-full w-full bg-black" : "aspect-video rounded-2xl border border-line",
         !isFs && wide && "sm:col-span-2",
         !isFs && large && "lg:col-span-2 lg:w-full lg:max-w-[calc(56vh_*_16/9)] lg:justify-self-center",
@@ -140,7 +244,10 @@ function VideoTile({
       )}
     >
       <div className="absolute inset-0 grid place-items-center">
-        <div className="grid h-14 w-14 place-items-center rounded-full border border-primary/35 bg-primary/10 font-display text-xl font-semibold text-primary">
+        <div
+          className="grid h-14 w-14 place-items-center rounded-full border border-primary/35 bg-primary/10 font-display text-xl font-semibold text-primary transition-shadow duration-150"
+          style={speaking ? { boxShadow: "0 0 0 3px #34d399" } : undefined}
+        >
           {(label.trim()[0] ?? "?").toUpperCase()}
         </div>
       </div>
@@ -158,7 +265,11 @@ function VideoTile({
       />
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs text-white">
         <span className="truncate font-semibold">{label}</span>
-        {micOff ? <MicOff className="size-3.5 shrink-0 text-red-300" /> : null}
+        {speaking ? (
+          <Mic className="size-3.5 shrink-0 animate-pulse" style={{ color: "#6ee7b7" }} />
+        ) : micOff ? (
+          <MicOff className="size-3.5 shrink-0 text-red-300" />
+        ) : null}
       </div>
       <button
         type="button"
@@ -747,6 +858,7 @@ function CallViewInner() {
             mirror
             showVideo={camOn}
             micOff={!micOn}
+            detectSpeech
             className="lg:order-last"
           />
           {remoteList.map(([id, r], index) => {
@@ -768,6 +880,7 @@ function CallViewInner() {
                   showVideo={r.cam}
                   micOff={!r.mic && r.media}
                   note={note}
+                  detectSpeech
                   large={index === 0 && !anyScreen}
                 />
                 {r.screen ? (

@@ -8,7 +8,7 @@ import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-B-oMDoSG.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-DnhpcLI_.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -9189,12 +9189,92 @@ function makeCode() {
 	return Array.from(a, (b) => ALPHABET[b % 32]).join("");
 }
 var cleanCode = (s) => s.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
-function VideoTile({ stream, label, muted = false, mirror = false, wide = false, large = false, fit = "cover", className, showVideo = true, micOff = false, note }) {
+var sharedAudioCtx = null;
+function getAudioCtx() {
+	try {
+		if (!sharedAudioCtx) {
+			const AC = window.AudioContext || window.webkitAudioContext;
+			if (!AC) return null;
+			sharedAudioCtx = new AC();
+		}
+		if (sharedAudioCtx.state === "suspended") sharedAudioCtx.resume().catch(() => void 0);
+		return sharedAudioCtx;
+	} catch {
+		return null;
+	}
+}
+/** True while the audio in `stream` is loud enough to be someone talking. */
+function useSpeaking(stream) {
+	const [speaking, setSpeaking] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		setSpeaking(false);
+		if (!stream) return;
+		const ctx = getAudioCtx();
+		if (!ctx) return;
+		let source = null;
+		let analyser = null;
+		let buf = null;
+		let lastLoud = 0;
+		let on = false;
+		const disconnect = () => {
+			try {
+				source?.disconnect();
+			} catch {}
+			source = null;
+			analyser = null;
+			buf = null;
+		};
+		const connect = () => {
+			disconnect();
+			const track = stream.getAudioTracks()[0];
+			if (!track) return;
+			try {
+				source = ctx.createMediaStreamSource(new MediaStream([track]));
+				analyser = ctx.createAnalyser();
+				analyser.fftSize = 512;
+				source.connect(analyser);
+				buf = new Uint8Array(analyser.fftSize);
+			} catch {
+				disconnect();
+			}
+		};
+		connect();
+		stream.addEventListener("addtrack", connect);
+		stream.addEventListener("removetrack", connect);
+		const timer = window.setInterval(() => {
+			if (!analyser || !buf) return;
+			analyser.getByteTimeDomainData(buf);
+			let sum = 0;
+			for (let i = 0; i < buf.length; i++) {
+				const v = (buf[i] - 128) / 128;
+				sum += v * v;
+			}
+			const rms = Math.sqrt(sum / buf.length);
+			const now = performance.now();
+			if (rms > .03) lastLoud = now;
+			const next = now - lastLoud < 350;
+			if (next !== on) {
+				on = next;
+				setSpeaking(next);
+			}
+		}, 80);
+		return () => {
+			window.clearInterval(timer);
+			stream.removeEventListener("addtrack", connect);
+			stream.removeEventListener("removetrack", connect);
+			disconnect();
+			setSpeaking(false);
+		};
+	}, [stream]);
+	return speaking;
+}
+function VideoTile({ stream, label, muted = false, mirror = false, wide = false, large = false, fit = "cover", className, detectSpeech = false, showVideo = true, micOff = false, note }) {
 	const ref = (0, import_react.useRef)(null);
 	const [hasVideo, setHasVideo] = (0, import_react.useState)(false);
 	const [blocked, setBlocked] = (0, import_react.useState)(false);
 	const tileRef = (0, import_react.useRef)(null);
 	const [isFs, setIsFs] = (0, import_react.useState)(false);
+	const speaking = useSpeaking(detectSpeech ? stream : null);
 	(0, import_react.useEffect)(() => {
 		const onChange = () => setIsFs(document.fullscreenElement === tileRef.current);
 		document.addEventListener("fullscreenchange", onChange);
@@ -9235,12 +9315,14 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		ref: tileRef,
 		onDoubleClick: toggleFullscreen,
-		className: cn("relative overflow-hidden bg-bg/80", isFs ? "h-full w-full bg-black" : "aspect-video rounded-2xl border border-line", !isFs && wide && "sm:col-span-2", !isFs && large && "lg:col-span-2 lg:w-full lg:max-w-[calc(56vh_*_16/9)] lg:justify-self-center", className),
+		style: speaking ? { boxShadow: isFs ? "inset 0 0 0 5px #34d399" : "0 0 0 3px #34d399, 0 0 16px 2px rgba(52,211,153,0.55)" } : void 0,
+		className: cn("relative overflow-hidden bg-bg/80 transition-shadow duration-150", isFs ? "h-full w-full bg-black" : "aspect-video rounded-2xl border border-line", !isFs && wide && "sm:col-span-2", !isFs && large && "lg:col-span-2 lg:w-full lg:max-w-[calc(56vh_*_16/9)] lg:justify-self-center", className),
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute inset-0 grid place-items-center",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "grid h-14 w-14 place-items-center rounded-full border border-primary/35 bg-primary/10 font-display text-xl font-semibold text-primary",
+					className: "grid h-14 w-14 place-items-center rounded-full border border-primary/35 bg-primary/10 font-display text-xl font-semibold text-primary transition-shadow duration-150",
+					style: speaking ? { boxShadow: "0 0 0 3px #34d399" } : void 0,
 					children: (label.trim()[0] ?? "?").toUpperCase()
 				})
 			}),
@@ -9256,7 +9338,10 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "truncate font-semibold",
 					children: label
-				}), micOff ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-3.5 shrink-0 text-red-300" }) : null]
+				}), speaking ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mic, {
+					className: "size-3.5 shrink-0 animate-pulse",
+					style: { color: "#6ee7b7" }
+				}) : micOff ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-3.5 shrink-0 text-red-300" }) : null]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
@@ -9875,6 +9960,7 @@ function CallViewInner() {
 						mirror: true,
 						showVideo: camOn,
 						micOff: !micOn,
+						detectSpeech: true,
 						className: "lg:order-last"
 					}),
 					remoteList.map(([id, r], index) => {
@@ -9896,6 +9982,7 @@ function CallViewInner() {
 								showVideo: r.cam,
 								micOff: !r.mic && r.media,
 								note,
+								detectSpeech: true,
 								large: index === 0 && !anyScreen
 							}), r.screen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
 								stream: r.screen,
