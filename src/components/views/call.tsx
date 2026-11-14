@@ -62,10 +62,19 @@ function VideoTile({
 }) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [hasVideo, setHasVideo] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     const v = ref.current;
-    if (v && v.srcObject !== (stream ?? null)) v.srcObject = stream ?? null;
+    if (v && v.srcObject !== (stream ?? null)) {
+      v.srcObject = stream ?? null;
+      if (stream) {
+        v.play().then(
+          () => setBlocked(false),
+          () => setBlocked(true),
+        );
+      }
+    }
     if (!stream) {
       setHasVideo(false);
       return;
@@ -108,6 +117,20 @@ function VideoTile({
         <span className="truncate font-semibold">{label}</span>
         {micOff ? <MicOff className="size-3.5 shrink-0 text-red-300" /> : null}
       </div>
+      {blocked ? (
+        <button
+          type="button"
+          className="absolute inset-0 z-10 grid place-items-center bg-black/60 text-sm font-semibold text-white"
+          onClick={() => {
+            ref.current?.play().then(
+              () => setBlocked(false),
+              () => undefined,
+            );
+          }}
+        >
+          Tap to play
+        </button>
+      ) : null}
       {note ? (
         <div className="absolute inset-x-2 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white">
           {note}
@@ -146,10 +169,18 @@ export function CallView() {
   const nameRef = useRef("");
   const flagsRef = useRef({ mic: true, cam: true, media: false });
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const nameEditedRef = useRef(false);
+  const remoteObjs = useRef<Record<string, any>>({}); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const greetedRef = useRef<Set<string>>(new Set());
+
+  // Keep the name field in sync with the saved display name until the user edits it.
+  useEffect(() => {
+    if (!nameEditedRef.current && displayName) setName(displayName);
+  }, [displayName]);
 
   useEffect(() => {
     if (status !== "joined") return;
-    const t = window.setInterval(() => setNow(Date.now()), 4000);
+    const t = window.setInterval(() => setNow(Date.now()), 2000);
     return () => window.clearInterval(t);
   }, [status]);
 
@@ -162,7 +193,12 @@ export function CallView() {
     if (!peer) return;
     const payload = { type: "hello", name: nameRef.current, ...flagsRef.current };
     const p: Promise<void> = to ? peer.sendTo(to, payload) : peer.send(payload);
-    p.catch(() => undefined);
+    p.catch((e: { message?: string; code?: string }) => {
+      console.warn("[call] send failed", e);
+      setNotice(
+        `A message to another person failed (${e?.code ?? e?.message ?? "unknown"}). If this keeps happening, the Metered key may be missing the "Send" permission.`,
+      );
+    });
   }, []);
 
   const stopScreen = useCallback(() => {
@@ -191,6 +227,8 @@ export function CallView() {
     } catch {
       // ignore
     }
+    remoteObjs.current = {};
+    greetedRef.current = new Set();
     setLocalStream(null);
     setSharing(false);
     setRemotes({});
@@ -270,21 +308,28 @@ export function CallView() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       peer.on("peer-joined", ({ peer: remote }: { peer: any }) => {
         const id: string = remote.id;
+        remoteObjs.current[id] = remote;
         setRemotes((prev) => ({
           ...prev,
           [id]: prev[id] ?? { mic: true, cam: true, media: true, joinedAt: Date.now() },
         }));
         remote.on("stream-added", ({ stream, metadata }: { stream: MediaStream; metadata?: { role?: string } }) => {
           const key = metadata?.role === "screen" ? "screen" : "camera";
-          setRemotes((prev) => ({
-            ...prev,
-            [id]: { ...(prev[id] ?? { mic: true, cam: true, media: true, joinedAt: Date.now() }), [key]: stream },
-          }));
+          const label =
+            metadata?.role !== "screen" && typeof (metadata as { label?: unknown })?.label === "string"
+              ? String((metadata as { label?: string }).label).slice(0, 30)
+              : undefined;
+          setRemotes((prev) => {
+            const cur = prev[id] ?? { mic: true, cam: true, media: true, joinedAt: Date.now() };
+            return { ...prev, [id]: { ...cur, name: cur.name ?? label, [key]: stream } };
+          });
         });
         sendState(id);
       });
 
       peer.on("peer-left", ({ peer: remote }: { peer: { id: string } }) => {
+        delete remoteObjs.current[remote.id];
+        greetedRef.current.delete(remote.id);
         setRemotes((prev) => {
           const next = { ...prev };
           delete next[remote.id];
@@ -297,6 +342,10 @@ export function CallView() {
         ({ senderPeerId, data }: { senderPeerId: string; data: Record<string, unknown> | null }) => {
           if (!data || typeof data !== "object") return;
           if (data.type === "hello") {
+            if (!greetedRef.current.has(senderPeerId)) {
+              greetedRef.current.add(senderPeerId);
+              sendState(senderPeerId);
+            }
             setRemotes((prev) => ({
               ...prev,
               [senderPeerId]: {
@@ -335,6 +384,7 @@ export function CallView() {
       setRoom(cleaned);
       setStatus("joined");
       sendState();
+      [1500, 4000, 9000].forEach((ms) => window.setTimeout(() => sendState(), ms));
     } catch (e) {
       console.error(e);
       setError("Couldn't connect to the call service. Check your internet and try again.");
@@ -427,7 +477,10 @@ export function CallView() {
                 maxLength={30}
                 placeholder="Guest"
                 aria-label="Your name"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  nameEditedRef.current = true;
+                  setName(e.target.value);
+                }}
               />
 
               <span className="block text-xs font-semibold text-muted">Join with</span>
@@ -568,6 +621,14 @@ export function CallView() {
           {remoteList.map(([id, r]) => {
             const label = r.name || "Guest";
             const waiting = !r.camera && r.media && now - r.joinedAt > 15000;
+            const pc = remoteObjs.current[id]?.pc;
+            const link: string = pc?.connectionState ?? pc?.iceConnectionState ?? "waiting";
+            let note: string | undefined;
+            if (r.media) {
+              if (link === "failed") note = "Connection failed (network blocked it). Try both devices on the same Wi-Fi.";
+              else if (!r.camera) note = waiting ? `Still connecting… (${link})` : `Connecting… (${link})`;
+              else if (link !== "connected") note = `Link: ${link}`;
+            }
             return (
               <div key={id} className="contents">
                 <VideoTile
@@ -575,13 +636,7 @@ export function CallView() {
                   label={label}
                   showVideo={r.cam}
                   micOff={!r.mic && r.media}
-                  note={
-                    !r.camera && r.media
-                      ? waiting
-                        ? "Still connecting… strict networks (school, work, mobile data) can block calls."
-                        : "Connecting…"
-                      : undefined
-                  }
+                  note={note}
                 />
                 {r.screen ? <VideoTile stream={r.screen} label={`${label}'s screen`} wide /> : null}
               </div>

@@ -8,7 +8,7 @@ import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-Bq3y8a7J.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-BWuWfks9.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -9192,9 +9192,13 @@ var cleanCode = (s) => s.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
 function VideoTile({ stream, label, muted = false, mirror = false, wide = false, showVideo = true, micOff = false, note }) {
 	const ref = (0, import_react.useRef)(null);
 	const [hasVideo, setHasVideo] = (0, import_react.useState)(false);
+	const [blocked, setBlocked] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
 		const v = ref.current;
-		if (v && v.srcObject !== (stream ?? null)) v.srcObject = stream ?? null;
+		if (v && v.srcObject !== (stream ?? null)) {
+			v.srcObject = stream ?? null;
+			if (stream) v.play().then(() => setBlocked(false), () => setBlocked(true));
+		}
 		if (!stream) {
 			setHasVideo(false);
 			return;
@@ -9233,6 +9237,14 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 					children: label
 				}), micOff ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-3.5 shrink-0 text-red-300" }) : null]
 			}),
+			blocked ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				className: "absolute inset-0 z-10 grid place-items-center bg-black/60 text-sm font-semibold text-white",
+				onClick: () => {
+					ref.current?.play().then(() => setBlocked(false), () => void 0);
+				},
+				children: "Tap to play"
+			}) : null,
 			note ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute inset-x-2 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white",
 				children: note
@@ -9269,9 +9281,15 @@ function CallView() {
 		media: false
 	});
 	const chatEndRef = (0, import_react.useRef)(null);
+	const nameEditedRef = (0, import_react.useRef)(false);
+	const remoteObjs = (0, import_react.useRef)({});
+	const greetedRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
+	(0, import_react.useEffect)(() => {
+		if (!nameEditedRef.current && displayName) setName(displayName);
+	}, [displayName]);
 	(0, import_react.useEffect)(() => {
 		if (status !== "joined") return;
-		const t = window.setInterval(() => setNow(Date.now()), 4e3);
+		const t = window.setInterval(() => setNow(Date.now()), 2e3);
 		return () => window.clearInterval(t);
 	}, [status]);
 	(0, import_react.useEffect)(() => {
@@ -9285,7 +9303,10 @@ function CallView() {
 			name: nameRef.current,
 			...flagsRef.current
 		};
-		(to ? peer.sendTo(to, payload) : peer.send(payload)).catch(() => void 0);
+		(to ? peer.sendTo(to, payload) : peer.send(payload)).catch((e) => {
+			console.warn("[call] send failed", e);
+			setNotice(`A message to another person failed (${e?.code ?? e?.message ?? "unknown"}). If this keeps happening, the Metered key may be missing the "Send" permission.`);
+		});
 	}, []);
 	const stopScreen = (0, import_react.useCallback)(() => {
 		const s = screenRef.current;
@@ -9308,6 +9329,8 @@ function CallView() {
 		try {
 			await peer?.close("left");
 		} catch {}
+		remoteObjs.current = {};
+		greetedRef.current = /* @__PURE__ */ new Set();
 		setLocalStream(null);
 		setSharing(false);
 		setRemotes({});
@@ -9383,6 +9406,7 @@ function CallView() {
 			});
 			peer.on("peer-joined", ({ peer: remote }) => {
 				const id = remote.id;
+				remoteObjs.current[id] = remote;
 				setRemotes((prev) => ({
 					...prev,
 					[id]: prev[id] ?? {
@@ -9394,22 +9418,29 @@ function CallView() {
 				}));
 				remote.on("stream-added", ({ stream, metadata }) => {
 					const key = metadata?.role === "screen" ? "screen" : "camera";
-					setRemotes((prev) => ({
-						...prev,
-						[id]: {
-							...prev[id] ?? {
-								mic: true,
-								cam: true,
-								media: true,
-								joinedAt: Date.now()
-							},
-							[key]: stream
-						}
-					}));
+					const label = metadata?.role !== "screen" && typeof metadata?.label === "string" ? String(metadata.label).slice(0, 30) : void 0;
+					setRemotes((prev) => {
+						const cur = prev[id] ?? {
+							mic: true,
+							cam: true,
+							media: true,
+							joinedAt: Date.now()
+						};
+						return {
+							...prev,
+							[id]: {
+								...cur,
+								name: cur.name ?? label,
+								[key]: stream
+							}
+						};
+					});
 				});
 				sendState(id);
 			});
 			peer.on("peer-left", ({ peer: remote }) => {
+				delete remoteObjs.current[remote.id];
+				greetedRef.current.delete(remote.id);
 				setRemotes((prev) => {
 					const next = { ...prev };
 					delete next[remote.id];
@@ -9418,17 +9449,22 @@ function CallView() {
 			});
 			peer.on("data", ({ senderPeerId, data }) => {
 				if (!data || typeof data !== "object") return;
-				if (data.type === "hello") setRemotes((prev) => ({
-					...prev,
-					[senderPeerId]: {
-						...prev[senderPeerId] ?? { joinedAt: Date.now() },
-						name: typeof data.name === "string" ? data.name.slice(0, 30) : prev[senderPeerId]?.name,
-						mic: data.mic !== false,
-						cam: data.cam !== false,
-						media: data.media !== false
+				if (data.type === "hello") {
+					if (!greetedRef.current.has(senderPeerId)) {
+						greetedRef.current.add(senderPeerId);
+						sendState(senderPeerId);
 					}
-				}));
-				else if (data.type === "chat" && typeof data.text === "string") {
+					setRemotes((prev) => ({
+						...prev,
+						[senderPeerId]: {
+							...prev[senderPeerId] ?? { joinedAt: Date.now() },
+							name: typeof data.name === "string" ? data.name.slice(0, 30) : prev[senderPeerId]?.name,
+							mic: data.mic !== false,
+							cam: data.cam !== false,
+							media: data.media !== false
+						}
+					}));
+				} else if (data.type === "chat" && typeof data.text === "string") {
 					const text = data.text.slice(0, 500);
 					if (!text.trim()) return;
 					setMessages((prev) => [...prev, {
@@ -9454,6 +9490,11 @@ function CallView() {
 			setRoom(cleaned);
 			setStatus("joined");
 			sendState();
+			[
+				1500,
+				4e3,
+				9e3
+			].forEach((ms) => window.setTimeout(() => sendState(), ms));
 		} catch (e) {
 			console.error(e);
 			setError("Couldn't connect to the call service. Check your internet and try again.");
@@ -9557,7 +9598,10 @@ function CallView() {
 								maxLength: 30,
 								placeholder: "Guest",
 								"aria-label": "Your name",
-								onChange: (e) => setName(e.target.value)
+								onChange: (e) => {
+									nameEditedRef.current = true;
+									setName(e.target.value);
+								}
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "block text-xs font-semibold text-muted",
@@ -9736,6 +9780,14 @@ function CallView() {
 					remoteList.map(([id, r]) => {
 						const label = r.name || "Guest";
 						const waiting = !r.camera && r.media && now - r.joinedAt > 15e3;
+						const pc = remoteObjs.current[id]?.pc;
+						const link = pc?.connectionState ?? pc?.iceConnectionState ?? "waiting";
+						let note;
+						if (r.media) {
+							if (link === "failed") note = "Connection failed (network blocked it). Try both devices on the same Wi-Fi.";
+							else if (!r.camera) note = waiting ? `Still connecting… (${link})` : `Connecting… (${link})`;
+							else if (link !== "connected") note = `Link: ${link}`;
+						}
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "contents",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
@@ -9743,7 +9795,7 @@ function CallView() {
 								label,
 								showVideo: r.cam,
 								micOff: !r.mic && r.media,
-								note: !r.camera && r.media ? waiting ? "Still connecting… strict networks (school, work, mobile data) can block calls." : "Connecting…" : void 0
+								note
 							}), r.screen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
 								stream: r.screen,
 								label: `${label}'s screen`,
