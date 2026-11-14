@@ -3,8 +3,8 @@ import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui
 import { _ as createFileRoute, d as Scripts, f as HeadContent, g as lazyRouteComponent, h as Outlet, m as createRouter, v as createRootRoute, y as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { f as TriangleAlert } from "../_libs/lucide-react.mjs";
 import { a as union, i as string, n as number, r as object, t as literal } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CugN9ndD.js
-var router_CugN9ndD_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CdSm-FeO.js
+var router_CdSm_FeO_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var FALLBACK_MESSAGE = "An unexpected error occurred. Try reloading the page.";
@@ -332,7 +332,7 @@ function PreviewHostBridge() {
 	}, [router]);
 	return null;
 }
-var styles_default = "/assets/styles-B54r0Sjj.css";
+var styles_default = "/assets/styles-BToYt8xi.css";
 var APP_NAME = "Tracker";
 var Route$1 = createRootRoute({
 	head: () => ({
@@ -395,7 +395,7 @@ var Route$1 = createRootRoute({
 		] })]
 	})
 });
-var $$splitComponentImporter = () => import("./routes-p2ZSZl4p.mjs");
+var $$splitComponentImporter = () => import("./routes-CnlT1b8s.mjs");
 var rootRouteChildren = { IndexRoute: createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter, "component") }).update({
 	id: "/",
 	path: "/",
@@ -410,4 +410,4 @@ function getRouter() {
 	});
 }
 //#endregion
-export { getRouter, router_CugN9ndD_exports as t };
+export { getRouter, router_CdSm_FeO_exports as t };

@@ -8,7 +8,7 @@ import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-DnhpcLI_.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-CIqqwTMl.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -1188,6 +1188,21 @@ var THEMES = [
 		line: "#2a2a30"
 	},
 	{
+		id: "2105",
+		name: "21/05",
+		mode: "dark",
+		colorScheme: "light",
+		bg: "#d9dde3",
+		ink: "#e9ebef",
+		surface: "#f3f4f6",
+		fg: "#14171c",
+		muted: "#59606c",
+		primary: "#5d6672",
+		deep: "#3a414b",
+		on: "#f5f6f8",
+		line: "#b7bcc5"
+	},
+	{
 		id: "mcclassic",
 		name: "8bit Classic",
 		mode: "light",
@@ -1412,7 +1427,8 @@ var THEME_BADGES = {
 	amethyst: "mystique",
 	chuhahua: "author",
 	spooky: "cursed",
-	barbie: "solid"
+	barbie: "solid",
+	"2105": "personal"
 };
 function findTheme(id) {
 	return THEMES.find((theme) => theme.id === id) ?? THEMES[0];
@@ -1421,7 +1437,7 @@ function applyTheme(id) {
 	const theme = findTheme(id);
 	const root = document.documentElement;
 	root.dataset.theme = theme.id;
-	root.style.colorScheme = theme.mode;
+	root.style.colorScheme = theme.colorScheme ?? theme.mode;
 	if (theme.special) root.dataset.special = theme.special;
 	else delete root.dataset.special;
 	const pairs = [

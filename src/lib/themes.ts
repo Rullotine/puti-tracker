@@ -13,6 +13,8 @@ export type Theme = {
   deep: string;
   on: string;
   line: string;
+  /** Native controls (scrollbars, date pickers) follow this when set; otherwise they follow `mode`. */
+  colorScheme?: ThemeMode;
   /** Optional special background treatment (css class or pattern) */
   special?: "mcclassic" | "cherry" | "lushcave" | "amethyst" | "chuhahua" | "spooky";
 };
@@ -35,6 +37,8 @@ export const THEMES: Theme[] = [
   // --- real dark / black themes ---
   { id: "realblack", name: "Real black", mode: "dark", bg: "#000000", ink: "#0a0a0a", surface: "#111111", fg: "#eaeaea", muted: "#888888", primary: "#aaaaaa", deep: "#666666", on: "#000000", line: "#222222" },
   { id: "graphite", name: "Graphite", mode: "dark", bg: "#0c0c0e", ink: "#121214", surface: "#1a1a1e", fg: "#e4e4e8", muted: "#8a8a92", primary: "#a0a0a8", deep: "#707078", on: "#0c0c0e", line: "#2a2a30" },
+  // Personal: brushed metallic silver. Listed with the basic desks; native controls stay light so everything is readable.
+  { id: "2105", name: "21/05", mode: "dark", colorScheme: "light", bg: "#d9dde3", ink: "#e9ebef", surface: "#f3f4f6", fg: "#14171c", muted: "#59606c", primary: "#5d6672", deep: "#3a414b", on: "#f5f6f8", line: "#b7bcc5" },
 
 
   // --- 8bit Classic: stone inventory UI over a pixel-art landscape (drawn by components/mc-scene.tsx) ---
@@ -72,6 +76,7 @@ export const THEME_BADGES: Record<string, string> = {
   chuhahua: "author",
   spooky: "cursed",
   barbie: "solid",
+  "2105": "personal",
 };
 
 export function findTheme(id: string): Theme {
@@ -82,7 +87,7 @@ export function applyTheme(id: string) {
   const theme = findTheme(id);
   const root = document.documentElement;
   root.dataset.theme = theme.id;
-  root.style.colorScheme = theme.mode;
+  root.style.colorScheme = theme.colorScheme ?? theme.mode;
   if (theme.special) {
     root.dataset.special = theme.special;
   } else {
