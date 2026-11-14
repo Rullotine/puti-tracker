@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Copy,
   LogOut,
+  Maximize,
   Mic,
   MicOff,
   Monitor,
   MonitorOff,
+  Minimize,
+  RefreshCw,
   Send,
   Video,
   VideoOff,
@@ -47,6 +50,9 @@ function VideoTile({
   muted = false,
   mirror = false,
   wide = false,
+  large = false,
+  fit = "cover",
+  className,
   showVideo = true,
   micOff = false,
   note,
@@ -56,6 +62,9 @@ function VideoTile({
   muted?: boolean;
   mirror?: boolean;
   wide?: boolean;
+  large?: boolean;
+  fit?: "cover" | "contain";
+  className?: string;
   showVideo?: boolean;
   micOff?: boolean;
   note?: string;
@@ -63,6 +72,34 @@ function VideoTile({
   const ref = useRef<HTMLVideoElement | null>(null);
   const [hasVideo, setHasVideo] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [isFs, setIsFs] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFs(document.fullscreenElement === tileRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  function toggleFullscreen() {
+    try {
+      const el = tileRef.current;
+      if (!el) return;
+      if (document.fullscreenElement) {
+        void document.exitFullscreen().catch(() => undefined);
+        return;
+      }
+      if (el.requestFullscreen) {
+        void el.requestFullscreen().catch(() => undefined);
+      } else {
+        // iPhone Safari can only fullscreen the video element itself
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (ref.current as any)?.webkitEnterFullscreen?.();
+      }
+    } catch {
+      // fullscreen not available: ignore
+    }
+  }
 
   useEffect(() => {
     const v = ref.current;
@@ -92,9 +129,14 @@ function VideoTile({
   const visible = showVideo && hasVideo;
   return (
     <div
+      ref={tileRef}
+      onDoubleClick={toggleFullscreen}
       className={cn(
-        "relative aspect-video overflow-hidden rounded-2xl border border-line bg-bg/80",
-        wide && "sm:col-span-2",
+        "relative overflow-hidden bg-bg/80",
+        isFs ? "h-full w-full bg-black" : "aspect-video rounded-2xl border border-line",
+        !isFs && wide && "sm:col-span-2",
+        !isFs && large && "lg:col-span-2 lg:w-full lg:max-w-[calc(56vh_*_16/9)] lg:justify-self-center",
+        className,
       )}
     >
       <div className="absolute inset-0 grid place-items-center">
@@ -108,7 +150,8 @@ function VideoTile({
         playsInline
         muted={muted}
         className={cn(
-          "absolute inset-0 h-full w-full bg-black object-cover",
+          "absolute inset-0 h-full w-full bg-black",
+          fit === "contain" || isFs ? "object-contain" : "object-cover",
           mirror && "-scale-x-100",
           !visible && "invisible",
         )}
@@ -117,6 +160,15 @@ function VideoTile({
         <span className="truncate font-semibold">{label}</span>
         {micOff ? <MicOff className="size-3.5 shrink-0 text-red-300" /> : null}
       </div>
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className="absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-lg bg-black/55 text-white transition hover:bg-black/75"
+        aria-label={isFs ? "Exit full screen" : "Full screen"}
+        title={isFs ? "Exit full screen" : "Full screen (or double-click)"}
+      >
+        {isFs ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+      </button>
       {blocked ? (
         <button
           type="button"
@@ -132,7 +184,7 @@ function VideoTile({
         </button>
       ) : null}
       {note ? (
-        <div className="absolute inset-x-2 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white">
+        <div className="absolute left-2 right-12 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white">
           {note}
         </div>
       ) : null}
@@ -140,7 +192,36 @@ function VideoTile({
   );
 }
 
+class CallBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error("[call] crashed", error);
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <Panel title="Call">
+        <p className="text-sm text-muted">The Call tab hit a problem. The rest of the site is fine.</p>
+        <button type="button" className="btn btn-primary mt-3" onClick={() => this.setState({ failed: false })}>
+          Try again
+        </button>
+      </Panel>
+    );
+  }
+}
+
 export function CallView() {
+  return (
+    <CallBoundary>
+      <CallViewInner />
+    </CallBoundary>
+  );
+}
+
+function CallViewInner() {
   const displayName = useTracker((s) => s.displayName);
 
   const [name, setName] = useState(displayName || "");
@@ -154,6 +235,8 @@ export function CallView() {
 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [shareAudio, setShareAudio] = useState(false);
+  const [pendingRejoin, setPendingRejoin] = useState<string | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [remotes, setRemotes] = useState<Record<string, Remote>>({});
@@ -172,6 +255,7 @@ export function CallView() {
   const nameEditedRef = useRef(false);
   const remoteObjs = useRef<Record<string, any>>({}); // eslint-disable-line @typescript-eslint/no-explicit-any
   const greetedRef = useRef<Set<string>>(new Set());
+  const lastRoomRef = useRef<string | null>(null);
 
   // Keep the name field in sync with the saved display name until the user edits it.
   useEffect(() => {
@@ -212,6 +296,7 @@ export function CallView() {
     }
     s.getTracks().forEach((t) => t.stop());
     setSharing(false);
+    setShareAudio(false);
     peerRef.current?.send({ type: "screen-stopped" }).catch(() => undefined);
   }, []);
 
@@ -243,6 +328,18 @@ export function CallView() {
       void leave();
     };
   }, [leave]);
+
+  useEffect(() => {
+    if (status === "joined" && room) lastRoomRef.current = room;
+  }, [status, room]);
+
+  useEffect(() => {
+    if (pendingRejoin && status === "idle") {
+      const code = pendingRejoin;
+      setPendingRejoin(null);
+      void join(code);
+    }
+  });
 
   async function join(code: string) {
     const cleaned = cleanCode(code);
@@ -392,6 +489,13 @@ export function CallView() {
     }
   }
 
+  async function reconnect() {
+    const code = lastRoomRef.current;
+    if (!code) return;
+    setPendingRejoin(code);
+    await leave();
+  }
+
   function toggleMic() {
     const tracks = localRef.current?.getAudioTracks() ?? [];
     if (tracks.length === 0) return;
@@ -418,8 +522,26 @@ export function CallView() {
       return;
     }
     try {
-      const s = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      let s: MediaStream;
+      try {
+        s = await navigator.mediaDevices.getDisplayMedia({
+          video: { frameRate: { ideal: 30 } },
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+          systemAudio: "include",
+        } as DisplayMediaStreamOptions);
+      } catch (err) {
+        const name = (err as { name?: string })?.name;
+        if (name === "NotAllowedError" || name === "AbortError") return; // you cancelled the picker
+        s = await navigator.mediaDevices.getDisplayMedia({ video: true }); // browser refused audio: share without it
+      }
       screenRef.current = s;
+      const withAudio = s.getAudioTracks().length > 0;
+      setShareAudio(withAudio);
+      setNotice(
+        withAudio
+          ? null
+          : "Sharing without sound. To include audio, share a Chrome Tab and tick “Also share tab audio”, or share the Entire screen and tick “Share system audio”. A single window has no audio option.",
+      );
       setSharing(true);
       peerRef.current?.addStream(s, { role: "screen", label: `${nameRef.current}'s screen` });
       s.getVideoTracks()[0]?.addEventListener("ended", stopScreen);
@@ -457,6 +579,7 @@ export function CallView() {
 
   const canShare = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getDisplayMedia;
   const remoteList = Object.entries(remotes);
+  const anyScreen = remoteList.some(([, r]) => !!r.screen);
 
   // ---------- Lobby ----------
   if (status !== "joined") {
@@ -595,6 +718,9 @@ export function CallView() {
                 {sharing ? <MonitorOff className="size-4" /> : <Monitor className="size-4" />}
               </button>
             ) : null}
+            <button type="button" className="btn btn-ghost" onClick={() => void reconnect()} aria-label="Reconnect to the room">
+              <RefreshCw className="size-4" /> Reconnect
+            </button>
             <button type="button" className="btn btn-danger" onClick={() => void leave()}>
               <LogOut className="size-4" /> Leave
             </button>
@@ -605,7 +731,11 @@ export function CallView() {
         ) : null}
         {error ? <p className="mt-3 rounded-xl border border-red-400/40 bg-red-500/10 p-2 text-xs">{error}</p> : null}
         {notice ? <p className="mt-3 text-xs text-muted">{notice}</p> : null}
-        {sharing ? <p className="mt-3 text-xs text-primary">You&apos;re sharing your screen.</p> : null}
+        {sharing ? (
+          <p className="mt-3 text-xs text-primary">
+            You&apos;re sharing your screen{shareAudio ? " with audio. Use headphones, or friends may hear an echo of themselves." : "."}
+          </p>
+        ) : null}
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -617,15 +747,16 @@ export function CallView() {
             mirror
             showVideo={camOn}
             micOff={!micOn}
+            className="lg:order-last"
           />
-          {remoteList.map(([id, r]) => {
+          {remoteList.map(([id, r], index) => {
             const label = r.name || "Guest";
             const waiting = !r.camera && r.media && now - r.joinedAt > 15000;
             const pc = remoteObjs.current[id]?.pc;
             const link: string = pc?.connectionState ?? pc?.iceConnectionState ?? "waiting";
             let note: string | undefined;
             if (r.media) {
-              if (link === "failed") note = "Connection failed (network blocked it). Try both devices on the same Wi-Fi.";
+              if (link === "failed") note = "Connection failed. Press Reconnect. If it keeps failing, turn off any VPN or try another network.";
               else if (!r.camera) note = waiting ? `Still connecting… (${link})` : `Connecting… (${link})`;
               else if (link !== "connected") note = `Link: ${link}`;
             }
@@ -637,8 +768,11 @@ export function CallView() {
                   showVideo={r.cam}
                   micOff={!r.mic && r.media}
                   note={note}
+                  large={index === 0 && !anyScreen}
                 />
-                {r.screen ? <VideoTile stream={r.screen} label={`${label}'s screen`} wide /> : null}
+                {r.screen ? (
+                  <VideoTile stream={r.screen} label={`${label}'s screen`} wide large fit="contain" />
+                ) : null}
               </div>
             );
           })}

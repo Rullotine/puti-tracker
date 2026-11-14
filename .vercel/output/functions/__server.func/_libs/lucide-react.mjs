@@ -478,6 +478,30 @@ var LogOut = createLucideIcon("log-out", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Maximize = createLucideIcon("maximize", [
+	["path", {
+		d: "M8 3H5a2 2 0 0 0-2 2v3",
+		key: "1dcmit"
+	}],
+	["path", {
+		d: "M21 8V5a2 2 0 0 0-2-2h-3",
+		key: "1e4gt3"
+	}],
+	["path", {
+		d: "M3 16v3a2 2 0 0 0 2 2h3",
+		key: "wsl5sc"
+	}],
+	["path", {
+		d: "M16 21h3a2 2 0 0 0 2-2v-3",
+		key: "18trek"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var MicOff = createLucideIcon("mic-off", [
 	["line", {
 		x1: "2",
@@ -531,6 +555,30 @@ var Mic = createLucideIcon("mic", [
 		y1: "19",
 		y2: "22",
 		key: "x3vr5v"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Minimize = createLucideIcon("minimize", [
+	["path", {
+		d: "M8 3v3a2 2 0 0 1-2 2H3",
+		key: "hohbtr"
+	}],
+	["path", {
+		d: "M21 8h-3a2 2 0 0 1-2-2V3",
+		key: "5jw1f3"
+	}],
+	["path", {
+		d: "M3 16h3a2 2 0 0 1 2 2v3",
+		key: "198tvr"
+	}],
+	["path", {
+		d: "M16 21v-3a2 2 0 0 1 2-2h3",
+		key: "ph8mxp"
 	}]
 ]);
 /**
@@ -730,6 +778,30 @@ var Play = createLucideIcon("play", [["polygon", {
 	points: "6 3 20 12 6 21 6 3",
 	key: "1oa8hb"
 }]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var RefreshCw = createLucideIcon("refresh-cw", [
+	["path", {
+		d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8",
+		key: "v9h5vc"
+	}],
+	["path", {
+		d: "M21 3v5h-5",
+		key: "1q7to0"
+	}],
+	["path", {
+		d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16",
+		key: "3uifl3"
+	}],
+	["path", {
+		d: "M8 16H3v5",
+		key: "1cv678"
+	}]
+]);
 /**
 * @license lucide-react v0.510.0 - ISC
 *
@@ -1128,4 +1200,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { MicOff as A, ChevronRight as B, Pause as C, Monitor as D, Moon as E, Heart as F, Bot as G, ChevronDown as H, Flame as I, Award as J, BookOpen as K, Dumbbell as L, Lock as M, ListChecks as N, MonitorOff as O, LayoutDashboard as P, Download as R, Pill as S, NotebookPen as T, Check as U, ChevronLeft as V, ChartColumn as W, AlarmClock as X, Apple as Y, Activity as Z, Send as _, Video as a, Play as b, Users as c, Upload as d, TriangleAlert as f, Sparkles as g, Square as h, Volume2 as i, LogOut as j, Mic as k, UserPlus as l, Timer as m, Wrench as n, VideoOff as o, Trash2 as p, Bell as q, VolumeX as r, Utensils as s, X as t, UserMinus as u, Search as v, Palette as w, Pin as x, RotateCcw as y, Copy as z };
+export { AlarmClock as $, Minimize as A, Dumbbell as B, Pill as C, Moon as D, NotebookPen as E, Lock as F, ChevronDown as G, Copy as H, ListChecks as I, Bot as J, Check as K, LayoutDashboard as L, MicOff as M, Maximize as N, Monitor as O, LogOut as P, Apple as Q, Heart as R, Pin as S, Palette as T, ChevronRight as U, Download as V, ChevronLeft as W, Bell as X, BookOpen as Y, Award as Z, Send as _, Video as a, RefreshCw as b, Users as c, Upload as d, Activity as et, TriangleAlert as f, Sparkles as g, Square as h, Volume2 as i, Mic as j, MonitorOff as k, UserPlus as l, Timer as m, Wrench as n, VideoOff as o, Trash2 as p, ChartColumn as q, VolumeX as r, Utensils as s, X as t, UserMinus as u, Search as v, Pause as w, Play as x, RotateCcw as y, Flame as z };

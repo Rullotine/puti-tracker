@@ -1,14 +1,14 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui/react-collection+[...].mjs";
 import { n as TSS_SERVER_FUNCTION, r as getServerFnById, t as createServerFn } from "./ssr.mjs";
-import { A as MicOff, B as ChevronRight, C as Pause, D as Monitor, E as Moon, F as Heart, G as Bot, H as ChevronDown, I as Flame, J as Award, K as BookOpen, L as Dumbbell, M as Lock, N as ListChecks, O as MonitorOff, P as LayoutDashboard, R as Download, S as Pill, T as NotebookPen, U as Check, V as ChevronLeft, W as ChartColumn, X as AlarmClock, Y as Apple, Z as Activity, _ as Send, a as Video, b as Play, c as Users, d as Upload, g as Sparkles, h as Square, i as Volume2, j as LogOut, k as Mic, l as UserPlus, m as Timer, n as Wrench, o as VideoOff, p as Trash2, q as Bell, r as VolumeX, s as Utensils, t as X, u as UserMinus, v as Search, w as Palette, x as Pin, y as RotateCcw, z as Copy } from "../_libs/lucide-react.mjs";
+import { $ as AlarmClock, A as Minimize, B as Dumbbell, C as Pill, D as Moon, E as NotebookPen, F as Lock, G as ChevronDown, H as Copy, I as ListChecks, J as Bot, K as Check, L as LayoutDashboard, M as MicOff, N as Maximize, O as Monitor, P as LogOut, Q as Apple, R as Heart, S as Pin, T as Palette, U as ChevronRight, V as Download, W as ChevronLeft, X as Bell, Y as BookOpen, Z as Award, _ as Send, a as Video, b as RefreshCw, c as Users, d as Upload, et as Activity, g as Sparkles, h as Square, i as Volume2, j as Mic, k as MonitorOff, l as UserPlus, m as Timer, n as Wrench, o as VideoOff, p as Trash2, q as ChartColumn, r as VolumeX, s as Utensils, t as X, u as UserMinus, v as Search, w as Pause, x as Play, y as RotateCcw, z as Flame } from "../_libs/lucide-react.mjs";
 import { n as create, t as persist } from "../_libs/zustand.mjs";
 import { t as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-BWuWfks9.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-B-oMDoSG.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -9189,10 +9189,29 @@ function makeCode() {
 	return Array.from(a, (b) => ALPHABET[b % 32]).join("");
 }
 var cleanCode = (s) => s.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
-function VideoTile({ stream, label, muted = false, mirror = false, wide = false, showVideo = true, micOff = false, note }) {
+function VideoTile({ stream, label, muted = false, mirror = false, wide = false, large = false, fit = "cover", className, showVideo = true, micOff = false, note }) {
 	const ref = (0, import_react.useRef)(null);
 	const [hasVideo, setHasVideo] = (0, import_react.useState)(false);
 	const [blocked, setBlocked] = (0, import_react.useState)(false);
+	const tileRef = (0, import_react.useRef)(null);
+	const [isFs, setIsFs] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const onChange = () => setIsFs(document.fullscreenElement === tileRef.current);
+		document.addEventListener("fullscreenchange", onChange);
+		return () => document.removeEventListener("fullscreenchange", onChange);
+	}, []);
+	function toggleFullscreen() {
+		try {
+			const el = tileRef.current;
+			if (!el) return;
+			if (document.fullscreenElement) {
+				document.exitFullscreen().catch(() => void 0);
+				return;
+			}
+			if (el.requestFullscreen) el.requestFullscreen().catch(() => void 0);
+			else ref.current?.webkitEnterFullscreen?.();
+		} catch {}
+	}
 	(0, import_react.useEffect)(() => {
 		const v = ref.current;
 		if (v && v.srcObject !== (stream ?? null)) {
@@ -9214,7 +9233,9 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 	}, [stream]);
 	const visible = showVideo && hasVideo;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: cn("relative aspect-video overflow-hidden rounded-2xl border border-line bg-bg/80", wide && "sm:col-span-2"),
+		ref: tileRef,
+		onDoubleClick: toggleFullscreen,
+		className: cn("relative overflow-hidden bg-bg/80", isFs ? "h-full w-full bg-black" : "aspect-video rounded-2xl border border-line", !isFs && wide && "sm:col-span-2", !isFs && large && "lg:col-span-2 lg:w-full lg:max-w-[calc(56vh_*_16/9)] lg:justify-self-center", className),
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute inset-0 grid place-items-center",
@@ -9228,7 +9249,7 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 				autoPlay: true,
 				playsInline: true,
 				muted,
-				className: cn("absolute inset-0 h-full w-full bg-black object-cover", mirror && "-scale-x-100", !visible && "invisible")
+				className: cn("absolute inset-0 h-full w-full bg-black", fit === "contain" || isFs ? "object-contain" : "object-cover", mirror && "-scale-x-100", !visible && "invisible")
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs text-white",
@@ -9236,6 +9257,14 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 					className: "truncate font-semibold",
 					children: label
 				}), micOff ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-3.5 shrink-0 text-red-300" }) : null]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				onClick: toggleFullscreen,
+				className: "absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-lg bg-black/55 text-white transition hover:bg-black/75",
+				"aria-label": isFs ? "Exit full screen" : "Full screen",
+				title: isFs ? "Exit full screen" : "Full screen (or double-click)",
+				children: isFs ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Minimize, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Maximize, { className: "size-4" })
 			}),
 			blocked ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
@@ -9246,13 +9275,40 @@ function VideoTile({ stream, label, muted = false, mirror = false, wide = false,
 				children: "Tap to play"
 			}) : null,
 			note ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute inset-x-2 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white",
+				className: "absolute left-2 right-12 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white",
 				children: note
 			}) : null
 		]
 	});
 }
+var CallBoundary = class extends import_react.Component {
+	state = { failed: false };
+	static getDerivedStateFromError() {
+		return { failed: true };
+	}
+	componentDidCatch(error) {
+		console.error("[call] crashed", error);
+	}
+	render() {
+		if (!this.state.failed) return this.props.children;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, {
+			title: "Call",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-sm text-muted",
+				children: "The Call tab hit a problem. The rest of the site is fine."
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				className: "btn btn-primary mt-3",
+				onClick: () => this.setState({ failed: false }),
+				children: "Try again"
+			})]
+		});
+	}
+};
 function CallView() {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CallBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CallViewInner, {}) });
+}
+function CallViewInner() {
 	const displayName = useTracker((s) => s.displayName);
 	const [name, setName] = (0, import_react.useState)(displayName || "");
 	const [mode, setMode] = (0, import_react.useState)("video");
@@ -9264,6 +9320,8 @@ function CallView() {
 	const [notice, setNotice] = (0, import_react.useState)(null);
 	const [localStream, setLocalStream] = (0, import_react.useState)(null);
 	const [sharing, setSharing] = (0, import_react.useState)(false);
+	const [shareAudio, setShareAudio] = (0, import_react.useState)(false);
+	const [pendingRejoin, setPendingRejoin] = (0, import_react.useState)(null);
 	const [micOn, setMicOn] = (0, import_react.useState)(true);
 	const [camOn, setCamOn] = (0, import_react.useState)(true);
 	const [remotes, setRemotes] = (0, import_react.useState)({});
@@ -9284,6 +9342,7 @@ function CallView() {
 	const nameEditedRef = (0, import_react.useRef)(false);
 	const remoteObjs = (0, import_react.useRef)({});
 	const greetedRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
+	const lastRoomRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
 		if (!nameEditedRef.current && displayName) setName(displayName);
 	}, [displayName]);
@@ -9317,6 +9376,7 @@ function CallView() {
 		} catch {}
 		s.getTracks().forEach((t) => t.stop());
 		setSharing(false);
+		setShareAudio(false);
 		peerRef.current?.send({ type: "screen-stopped" }).catch(() => void 0);
 	}, []);
 	const leave = (0, import_react.useCallback)(async () => {
@@ -9344,6 +9404,16 @@ function CallView() {
 			leave();
 		};
 	}, [leave]);
+	(0, import_react.useEffect)(() => {
+		if (status === "joined" && room) lastRoomRef.current = room;
+	}, [status, room]);
+	(0, import_react.useEffect)(() => {
+		if (pendingRejoin && status === "idle") {
+			const code = pendingRejoin;
+			setPendingRejoin(null);
+			join(code);
+		}
+	});
 	async function join(code) {
 		const cleaned = cleanCode(code);
 		if (cleaned.length < 6) {
@@ -9501,6 +9571,12 @@ function CallView() {
 			await leave();
 		}
 	}
+	async function reconnect() {
+		const code = lastRoomRef.current;
+		if (!code) return;
+		setPendingRejoin(code);
+		await leave();
+	}
 	function toggleMic() {
 		const tracks = localRef.current?.getAudioTracks() ?? [];
 		if (tracks.length === 0) return;
@@ -9531,11 +9607,26 @@ function CallView() {
 			return;
 		}
 		try {
-			const s = await navigator.mediaDevices.getDisplayMedia({
-				video: true,
-				audio: false
-			});
+			let s;
+			try {
+				s = await navigator.mediaDevices.getDisplayMedia({
+					video: { frameRate: { ideal: 30 } },
+					audio: {
+						echoCancellation: false,
+						noiseSuppression: false,
+						autoGainControl: false
+					},
+					systemAudio: "include"
+				});
+			} catch (err) {
+				const name = err?.name;
+				if (name === "NotAllowedError" || name === "AbortError") return;
+				s = await navigator.mediaDevices.getDisplayMedia({ video: true });
+			}
 			screenRef.current = s;
+			const withAudio = s.getAudioTracks().length > 0;
+			setShareAudio(withAudio);
+			setNotice(withAudio ? null : "Sharing without sound. To include audio, share a Chrome Tab and tick “Also share tab audio”, or share the Entire screen and tick “Share system audio”. A single window has no audio option.");
 			setSharing(true);
 			peerRef.current?.addStream(s, {
 				role: "screen",
@@ -9574,6 +9665,7 @@ function CallView() {
 	}
 	const canShare = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getDisplayMedia;
 	const remoteList = Object.entries(remotes);
+	const anyScreen = remoteList.some(([, r]) => !!r.screen);
 	if (status !== "joined") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-4",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, {
@@ -9741,6 +9833,13 @@ function CallView() {
 						}) : null,
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
+							className: "btn btn-ghost",
+							onClick: () => void reconnect(),
+							"aria-label": "Reconnect to the room",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "size-4" }), " Reconnect"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
 							className: "btn btn-danger",
 							onClick: () => void leave(),
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "size-4" }), " Leave"]
@@ -9760,9 +9859,9 @@ function CallView() {
 				className: "mt-3 text-xs text-muted",
 				children: notice
 			}) : null,
-			sharing ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			sharing ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 				className: "mt-3 text-xs text-primary",
-				children: "You're sharing your screen."
+				children: ["You're sharing your screen", shareAudio ? " with audio. Use headphones, or friends may hear an echo of themselves." : "."]
 			}) : null
 		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]",
@@ -9775,16 +9874,17 @@ function CallView() {
 						muted: true,
 						mirror: true,
 						showVideo: camOn,
-						micOff: !micOn
+						micOff: !micOn,
+						className: "lg:order-last"
 					}),
-					remoteList.map(([id, r]) => {
+					remoteList.map(([id, r], index) => {
 						const label = r.name || "Guest";
 						const waiting = !r.camera && r.media && now - r.joinedAt > 15e3;
 						const pc = remoteObjs.current[id]?.pc;
 						const link = pc?.connectionState ?? pc?.iceConnectionState ?? "waiting";
 						let note;
 						if (r.media) {
-							if (link === "failed") note = "Connection failed (network blocked it). Try both devices on the same Wi-Fi.";
+							if (link === "failed") note = "Connection failed. Press Reconnect. If it keeps failing, turn off any VPN or try another network.";
 							else if (!r.camera) note = waiting ? `Still connecting… (${link})` : `Connecting… (${link})`;
 							else if (link !== "connected") note = `Link: ${link}`;
 						}
@@ -9795,11 +9895,14 @@ function CallView() {
 								label,
 								showVideo: r.cam,
 								micOff: !r.mic && r.media,
-								note
+								note,
+								large: index === 0 && !anyScreen
 							}), r.screen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
 								stream: r.screen,
 								label: `${label}'s screen`,
-								wide: true
+								wide: true,
+								large: true,
+								fit: "contain"
 							}) : null]
 						}, id);
 					}),
