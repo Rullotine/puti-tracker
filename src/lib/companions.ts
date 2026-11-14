@@ -793,7 +793,8 @@ interface CompanionStoreState {
   clearDiscovery: () => void;
 }
 
-const SECONDS_PER_ENCOUNTER = 25;
+// Seconds of focus (at base speed) per spirit encounter. Higher = spirits are harder to find.
+const SECONDS_PER_ENCOUNTER = 75;
 const PET_BOOST_PCT = 12;
 const PET_COOLDOWN_MS = 12_000;
 
@@ -857,6 +858,23 @@ export const useCompanions = create<CompanionStoreState>()(
         const chosen = pickWeighted(candidates, bonuses.rareMult);
         const isNew = !unlocked[chosen.id];
         const prev = unlocked[chosen.id];
+
+        // Already-discovered spirit: quietly count the visit toward its bond,
+        // but no toast, chime, notice, or swapping your active companion.
+        if (!isNew) {
+          set((state) => ({
+            spiritProgress: 0,
+            unlocked: {
+              ...state.unlocked,
+              [chosen.id]: {
+                discoveredAt: prev?.discoveredAt ?? new Date().toISOString(),
+                encounters: (prev?.encounters ?? 0) + 1,
+                pets: prev?.pets ?? 0,
+              },
+            },
+          }));
+          return null;
+        }
 
         set((state) => ({
           spiritProgress: 0,

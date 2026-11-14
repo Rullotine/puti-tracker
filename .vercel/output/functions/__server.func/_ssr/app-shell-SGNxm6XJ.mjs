@@ -8,7 +8,7 @@ import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-MLZChbwn.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-SGNxm6XJ.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -5290,7 +5290,7 @@ function computeFocusBonusMinutes(baseMinutes) {
 	if (bonuses.focusBonusPct <= 0) return 0;
 	return Math.max(1, Math.round(baseMinutes * bonuses.focusBonusPct / 100));
 }
-var SECONDS_PER_ENCOUNTER = 25;
+var SECONDS_PER_ENCOUNTER = 75;
 var PET_BOOST_PCT = 12;
 var PET_COOLDOWN_MS = 12e3;
 function pickWeighted(candidates, rareMult) {
@@ -5338,6 +5338,20 @@ var useCompanions = create()(persist((set, get) => ({
 		const chosen = pickWeighted(undiscoveredNative.length > 0 ? undiscoveredNative : undiscoveredBiome.length > 0 ? undiscoveredBiome : undiscoveredAny.length > 0 ? undiscoveredAny : pool, bonuses.rareMult);
 		const isNew = !unlocked[chosen.id];
 		const prev = unlocked[chosen.id];
+		if (!isNew) {
+			set((state) => ({
+				spiritProgress: 0,
+				unlocked: {
+					...state.unlocked,
+					[chosen.id]: {
+						discoveredAt: prev?.discoveredAt ?? (/* @__PURE__ */ new Date()).toISOString(),
+						encounters: (prev?.encounters ?? 0) + 1,
+						pets: prev?.pets ?? 0
+					}
+				}
+			}));
+			return null;
+		}
 		set((state) => ({
 			spiritProgress: 0,
 			activeCompanionId: chosen.id,
