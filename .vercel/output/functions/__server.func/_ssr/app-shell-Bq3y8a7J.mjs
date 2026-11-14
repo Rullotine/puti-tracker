@@ -1,14 +1,14 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui/react-collection+[...].mjs";
 import { n as TSS_SERVER_FUNCTION, r as getServerFnById, t as createServerFn } from "./ssr.mjs";
-import { A as Flame, B as BookOpen, C as NotebookPen, D as ListChecks, E as Lock, F as ChevronLeft, G as Activity, H as Award, I as ChevronDown, L as Check, M as Download, N as Copy, O as LayoutDashboard, P as ChevronRight, R as ChartColumn, S as Palette, T as LogOut, U as Apple, V as Bell, W as AlarmClock, _ as RotateCcw, a as Utensils, b as Pill, c as UserMinus, d as Trash2, f as Timer, g as Search, h as Send, i as Volume2, j as Dumbbell, k as Heart, l as Upload, m as Sparkles, n as Wrench, o as Users, p as Square, r as VolumeX, s as UserPlus, t as X, v as Play, w as Moon, x as Pause, y as Pin, z as Bot } from "../_libs/lucide-react.mjs";
+import { A as MicOff, B as ChevronRight, C as Pause, D as Monitor, E as Moon, F as Heart, G as Bot, H as ChevronDown, I as Flame, J as Award, K as BookOpen, L as Dumbbell, M as Lock, N as ListChecks, O as MonitorOff, P as LayoutDashboard, R as Download, S as Pill, T as NotebookPen, U as Check, V as ChevronLeft, W as ChartColumn, X as AlarmClock, Y as Apple, Z as Activity, _ as Send, a as Video, b as Play, c as Users, d as Upload, g as Sparkles, h as Square, i as Volume2, j as LogOut, k as Mic, l as UserPlus, m as Timer, n as Wrench, o as VideoOff, p as Trash2, q as Bell, r as VolumeX, s as Utensils, t as X, u as UserMinus, v as Search, w as Palette, x as Pin, y as RotateCcw, z as Copy } from "../_libs/lucide-react.mjs";
 import { n as create, t as persist } from "../_libs/zustand.mjs";
 import { t as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as XAxis, c as CartesianGrid, d as ResponsiveContainer, f as Tooltip, i as YAxis, l as ReferenceLine, n as BarChart, o as Area, r as LineChart, s as Line, t as AreaChart, u as Bar } from "../_libs/recharts+[...].mjs";
 import { i as TabsTrigger, n as TabsContent, r as TabsList, t as Tabs } from "../_libs/radix-ui__react-tabs.mjs";
 import { S as Scene$1, _ as PerspectiveCamera, a as BufferAttribute, b as PointsMaterial, c as Clock, d as Group, f as HemisphereLight, g as MeshStandardMaterial, h as MeshBasicMaterial, i as BoxGeometry, l as Color, m as Mesh, n as PMREMGenerator, o as BufferGeometry, p as MathUtils, r as WebGLRenderer, s as CanvasTexture, t as RoomEnvironment, u as DirectionalLight, v as PlaneGeometry, x as SRGBColorSpace, y as Points } from "../_libs/three.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-SGNxm6XJ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/app-shell-Bq3y8a7J.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var GLYPHS$1 = "アイウエオカキクケコサシスセソ0123456789PUTI<>[]{}".split("");
@@ -6995,6 +6995,11 @@ var VIEWS = [
 		icon: Users
 	},
 	{
+		id: "call",
+		label: "Call",
+		icon: Video
+	},
+	{
 		id: "themes",
 		label: "Themes",
 		icon: Palette
@@ -7028,7 +7033,11 @@ var NAV_GROUPS = [
 		id: "social",
 		label: "Social",
 		icon: Users,
-		subgroups: ["friends", "groups"]
+		subgroups: [
+			"friends",
+			"groups",
+			"call"
+		]
 	}
 ];
 var NAV_TREE = [
@@ -9170,6 +9179,642 @@ function BestiaryView({ onJump }) {
 				})]
 			})
 		]
+	});
+}
+var METERED_KEY = String("pk_live_ef917d86a5499560617bff06e8f0565df6ba5c7e").trim();
+var ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function makeCode() {
+	const a = /* @__PURE__ */ new Uint8Array(8);
+	crypto.getRandomValues(a);
+	return Array.from(a, (b) => ALPHABET[b % 32]).join("");
+}
+var cleanCode = (s) => s.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+function VideoTile({ stream, label, muted = false, mirror = false, wide = false, showVideo = true, micOff = false, note }) {
+	const ref = (0, import_react.useRef)(null);
+	const [hasVideo, setHasVideo] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const v = ref.current;
+		if (v && v.srcObject !== (stream ?? null)) v.srcObject = stream ?? null;
+		if (!stream) {
+			setHasVideo(false);
+			return;
+		}
+		const update = () => setHasVideo(stream.getVideoTracks().length > 0);
+		update();
+		stream.addEventListener("addtrack", update);
+		stream.addEventListener("removetrack", update);
+		return () => {
+			stream.removeEventListener("addtrack", update);
+			stream.removeEventListener("removetrack", update);
+		};
+	}, [stream]);
+	const visible = showVideo && hasVideo;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: cn("relative aspect-video overflow-hidden rounded-2xl border border-line bg-bg/80", wide && "sm:col-span-2"),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0 grid place-items-center",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "grid h-14 w-14 place-items-center rounded-full border border-primary/35 bg-primary/10 font-display text-xl font-semibold text-primary",
+					children: (label.trim()[0] ?? "?").toUpperCase()
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+				ref,
+				autoPlay: true,
+				playsInline: true,
+				muted,
+				className: cn("absolute inset-0 h-full w-full bg-black object-cover", mirror && "-scale-x-100", !visible && "invisible")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs text-white",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "truncate font-semibold",
+					children: label
+				}), micOff ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-3.5 shrink-0 text-red-300" }) : null]
+			}),
+			note ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-x-2 top-2 rounded-lg bg-black/65 px-2 py-1 text-[11px] leading-snug text-white",
+				children: note
+			}) : null
+		]
+	});
+}
+function CallView() {
+	const displayName = useTracker((s) => s.displayName);
+	const [name, setName] = (0, import_react.useState)(displayName || "");
+	const [mode, setMode] = (0, import_react.useState)("video");
+	const [joinCode, setJoinCode] = (0, import_react.useState)("");
+	const [room, setRoom] = (0, import_react.useState)(null);
+	const [status, setStatus] = (0, import_react.useState)("idle");
+	const [conn, setConn] = (0, import_react.useState)("idle");
+	const [error, setError] = (0, import_react.useState)(null);
+	const [notice, setNotice] = (0, import_react.useState)(null);
+	const [localStream, setLocalStream] = (0, import_react.useState)(null);
+	const [sharing, setSharing] = (0, import_react.useState)(false);
+	const [micOn, setMicOn] = (0, import_react.useState)(true);
+	const [camOn, setCamOn] = (0, import_react.useState)(true);
+	const [remotes, setRemotes] = (0, import_react.useState)({});
+	const [messages, setMessages] = (0, import_react.useState)([]);
+	const [draft, setDraft] = (0, import_react.useState)("");
+	const [copied, setCopied] = (0, import_react.useState)(false);
+	const [now, setNow] = (0, import_react.useState)(() => Date.now());
+	const peerRef = (0, import_react.useRef)(null);
+	const localRef = (0, import_react.useRef)(null);
+	const screenRef = (0, import_react.useRef)(null);
+	const nameRef = (0, import_react.useRef)("");
+	const flagsRef = (0, import_react.useRef)({
+		mic: true,
+		cam: true,
+		media: false
+	});
+	const chatEndRef = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		if (status !== "joined") return;
+		const t = window.setInterval(() => setNow(Date.now()), 4e3);
+		return () => window.clearInterval(t);
+	}, [status]);
+	(0, import_react.useEffect)(() => {
+		chatEndRef.current?.scrollIntoView({ block: "nearest" });
+	}, [messages.length]);
+	const sendState = (0, import_react.useCallback)((to) => {
+		const peer = peerRef.current;
+		if (!peer) return;
+		const payload = {
+			type: "hello",
+			name: nameRef.current,
+			...flagsRef.current
+		};
+		(to ? peer.sendTo(to, payload) : peer.send(payload)).catch(() => void 0);
+	}, []);
+	const stopScreen = (0, import_react.useCallback)(() => {
+		const s = screenRef.current;
+		if (!s) return;
+		screenRef.current = null;
+		try {
+			peerRef.current?.removeStream(s);
+		} catch {}
+		s.getTracks().forEach((t) => t.stop());
+		setSharing(false);
+		peerRef.current?.send({ type: "screen-stopped" }).catch(() => void 0);
+	}, []);
+	const leave = (0, import_react.useCallback)(async () => {
+		const peer = peerRef.current;
+		peerRef.current = null;
+		screenRef.current?.getTracks().forEach((t) => t.stop());
+		screenRef.current = null;
+		localRef.current?.getTracks().forEach((t) => t.stop());
+		localRef.current = null;
+		try {
+			await peer?.close("left");
+		} catch {}
+		setLocalStream(null);
+		setSharing(false);
+		setRemotes({});
+		setMessages([]);
+		setRoom(null);
+		setStatus("idle");
+		setConn("idle");
+	}, []);
+	(0, import_react.useEffect)(() => {
+		return () => {
+			leave();
+		};
+	}, [leave]);
+	async function join(code) {
+		const cleaned = cleanCode(code);
+		if (cleaned.length < 6) {
+			setError("Room codes are at least 6 letters/numbers.");
+			return;
+		}
+		if (!METERED_KEY) {
+			setError("Calls aren't set up yet: the Metered key (VITE_METERED_API_KEY) is missing from this build.");
+			return;
+		}
+		if (status !== "idle") return;
+		setError(null);
+		setNotice(null);
+		setStatus("joining");
+		const myName = (name.trim() || "Guest").slice(0, 30);
+		nameRef.current = myName;
+		let local = null;
+		if (mode !== "chat") try {
+			local = await navigator.mediaDevices.getUserMedia({
+				audio: {
+					echoCancellation: true,
+					noiseSuppression: true
+				},
+				video: mode === "video" ? {
+					width: { ideal: 640 },
+					height: { ideal: 360 },
+					frameRate: { ideal: 24 }
+				} : false
+			});
+		} catch {
+			if (mode === "video") try {
+				local = await navigator.mediaDevices.getUserMedia({
+					audio: true,
+					video: false
+				});
+				setNotice("Camera unavailable, joined with voice only.");
+			} catch {
+				local = null;
+			}
+			if (!local) setNotice("Mic/camera blocked or unavailable, joined in text-only mode.");
+		}
+		localRef.current = local;
+		setLocalStream(local);
+		const hasVideo = !!local && local.getVideoTracks().length > 0;
+		const hasAudio = !!local && local.getAudioTracks().length > 0;
+		setMicOn(hasAudio);
+		setCamOn(hasVideo);
+		flagsRef.current = {
+			mic: hasAudio,
+			cam: hasVideo,
+			media: !!local
+		};
+		try {
+			const { MeteredPeer } = await import("../_libs/metered-ca__realtime.mjs").then((n) => n.t);
+			const peer = new MeteredPeer({ apiKey: METERED_KEY });
+			peerRef.current = peer;
+			peer.on("state-change", ({ to }) => setConn(to));
+			peer.on("error", ({ err }) => {
+				setError(err?.name === "account_suspended" ? "The call service is unavailable right now." : `Connection problem: ${err?.message ?? "unknown error"}`);
+			});
+			peer.on("peer-joined", ({ peer: remote }) => {
+				const id = remote.id;
+				setRemotes((prev) => ({
+					...prev,
+					[id]: prev[id] ?? {
+						mic: true,
+						cam: true,
+						media: true,
+						joinedAt: Date.now()
+					}
+				}));
+				remote.on("stream-added", ({ stream, metadata }) => {
+					const key = metadata?.role === "screen" ? "screen" : "camera";
+					setRemotes((prev) => ({
+						...prev,
+						[id]: {
+							...prev[id] ?? {
+								mic: true,
+								cam: true,
+								media: true,
+								joinedAt: Date.now()
+							},
+							[key]: stream
+						}
+					}));
+				});
+				sendState(id);
+			});
+			peer.on("peer-left", ({ peer: remote }) => {
+				setRemotes((prev) => {
+					const next = { ...prev };
+					delete next[remote.id];
+					return next;
+				});
+			});
+			peer.on("data", ({ senderPeerId, data }) => {
+				if (!data || typeof data !== "object") return;
+				if (data.type === "hello") setRemotes((prev) => ({
+					...prev,
+					[senderPeerId]: {
+						...prev[senderPeerId] ?? { joinedAt: Date.now() },
+						name: typeof data.name === "string" ? data.name.slice(0, 30) : prev[senderPeerId]?.name,
+						mic: data.mic !== false,
+						cam: data.cam !== false,
+						media: data.media !== false
+					}
+				}));
+				else if (data.type === "chat" && typeof data.text === "string") {
+					const text = data.text.slice(0, 500);
+					if (!text.trim()) return;
+					setMessages((prev) => [...prev, {
+						id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+						from: senderPeerId,
+						text,
+						at: Date.now(),
+						fallbackName: typeof data.name === "string" ? data.name.slice(0, 30) : "Guest"
+					}].slice(-200));
+				} else if (data.type === "screen-stopped") setRemotes((prev) => prev[senderPeerId] ? {
+					...prev,
+					[senderPeerId]: {
+						...prev[senderPeerId],
+						screen: void 0
+					}
+				} : prev);
+			});
+			if (local) peer.addStream(local, {
+				role: "camera",
+				label: myName
+			});
+			await peer.join(`tracker-call-${cleaned}`);
+			setRoom(cleaned);
+			setStatus("joined");
+			sendState();
+		} catch (e) {
+			console.error(e);
+			setError("Couldn't connect to the call service. Check your internet and try again.");
+			await leave();
+		}
+	}
+	function toggleMic() {
+		const tracks = localRef.current?.getAudioTracks() ?? [];
+		if (tracks.length === 0) return;
+		const next = !tracks[0].enabled;
+		tracks.forEach((t) => t.enabled = next);
+		setMicOn(next);
+		flagsRef.current = {
+			...flagsRef.current,
+			mic: next
+		};
+		sendState();
+	}
+	function toggleCam() {
+		const tracks = localRef.current?.getVideoTracks() ?? [];
+		if (tracks.length === 0) return;
+		const next = !tracks[0].enabled;
+		tracks.forEach((t) => t.enabled = next);
+		setCamOn(next);
+		flagsRef.current = {
+			...flagsRef.current,
+			cam: next
+		};
+		sendState();
+	}
+	async function toggleScreen() {
+		if (screenRef.current) {
+			stopScreen();
+			return;
+		}
+		try {
+			const s = await navigator.mediaDevices.getDisplayMedia({
+				video: true,
+				audio: false
+			});
+			screenRef.current = s;
+			setSharing(true);
+			peerRef.current?.addStream(s, {
+				role: "screen",
+				label: `${nameRef.current}'s screen`
+			});
+			s.getVideoTracks()[0]?.addEventListener("ended", stopScreen);
+		} catch {}
+	}
+	function sendChat() {
+		const text = draft.trim().slice(0, 500);
+		const peer = peerRef.current;
+		if (!text || !peer || status !== "joined") return;
+		setDraft("");
+		setMessages((prev) => [...prev, {
+			id: `${Date.now()}-me`,
+			from: "me",
+			text,
+			at: Date.now(),
+			fallbackName: nameRef.current
+		}].slice(-200));
+		peer.send({
+			type: "chat",
+			text,
+			name: nameRef.current
+		}).catch(() => {
+			setNotice("A message couldn't be sent. Check your connection.");
+		});
+	}
+	async function copyCode() {
+		if (!room) return;
+		try {
+			await navigator.clipboard.writeText(room);
+			setCopied(true);
+			window.setTimeout(() => setCopied(false), 1500);
+		} catch {}
+	}
+	const canShare = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getDisplayMedia;
+	const remoteList = Object.entries(remotes);
+	if (status !== "joined") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "space-y-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, {
+			title: "Call",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mb-4 text-sm text-muted",
+					children: "Voice, video and text chat with friends. Nothing is saved: no accounts, no database, no history. Everything disappears when you leave. Works best with 2 to 4 people."
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "grid gap-4 md:grid-cols-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted",
+								children: "Your name"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								className: "field",
+								value: name,
+								maxLength: 30,
+								placeholder: "Guest",
+								"aria-label": "Your name",
+								onChange: (e) => setName(e.target.value)
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-xs font-semibold text-muted",
+								children: "Join with"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-wrap gap-2",
+								children: [
+									{
+										id: "video",
+										label: "Video + voice"
+									},
+									{
+										id: "voice",
+										label: "Voice only"
+									},
+									{
+										id: "chat",
+										label: "Text only"
+									}
+								].map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									className: cn("btn", mode === m.id ? "btn-primary" : "btn-ghost"),
+									onClick: () => setMode(m.id),
+									children: m.label
+								}, m.id))
+							})
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								className: "btn btn-primary w-full",
+								disabled: status === "joining",
+								onClick: () => void join(makeCode()),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "size-4" }), " Create a new room"]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-center text-xs text-muted",
+								children: "or join a friend's room"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+								className: "flex gap-2",
+								onSubmit: (e) => {
+									e.preventDefault();
+									join(joinCode);
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									className: "field uppercase",
+									value: joinCode,
+									maxLength: 12,
+									placeholder: "Room code",
+									"aria-label": "Room code",
+									onChange: (e) => setJoinCode(cleanCode(e.target.value))
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									className: "btn btn-ghost shrink-0",
+									type: "submit",
+									disabled: status === "joining" || !joinCode,
+									children: "Join"
+								})]
+							})
+						]
+					})]
+				}),
+				status === "joining" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-4 text-sm text-muted",
+					children: "Connecting…"
+				}) : null,
+				error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-4 rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm",
+					children: error
+				}) : null,
+				notice ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-3 text-xs text-muted",
+					children: notice
+				}) : null
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Panel, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-xs leading-relaxed text-muted",
+			children: "Calls connect your browsers directly. A free relay is used automatically when a network blocks that. Strict school, work or mobile networks can still fail. Anyone with the room code can join, so only share it with people you trust."
+		}) })]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "space-y-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-wrap items-center justify-between gap-3",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-semibold text-muted",
+							children: "Room code"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", {
+							className: "rounded-lg border border-line bg-bg/80 px-2 py-1 font-mono text-sm tracking-widest",
+							children: room
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							className: "btn btn-ghost",
+							onClick: () => void copyCode(),
+							"aria-label": "Copy room code",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "size-4" }),
+								" ",
+								copied ? "Copied" : "Copy"
+							]
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-wrap items-center gap-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: cn("btn", micOn ? "btn-ghost" : "btn-danger"),
+							onClick: toggleMic,
+							disabled: !localStream || localStream.getAudioTracks().length === 0,
+							"aria-label": micOn ? "Mute microphone" : "Unmute microphone",
+							children: micOn ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mic, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "size-4" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: cn("btn", camOn ? "btn-ghost" : "btn-danger"),
+							onClick: toggleCam,
+							disabled: !localStream || localStream.getVideoTracks().length === 0,
+							"aria-label": camOn ? "Turn camera off" : "Turn camera on",
+							children: camOn ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "size-4" })
+						}),
+						canShare ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: cn("btn", sharing ? "btn-primary" : "btn-ghost"),
+							onClick: () => void toggleScreen(),
+							"aria-label": sharing ? "Stop sharing screen" : "Share screen",
+							children: sharing ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MonitorOff, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "size-4" })
+						}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							className: "btn btn-danger",
+							onClick: () => void leave(),
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "size-4" }), " Leave"]
+						})
+					]
+				})]
+			}),
+			conn === "reconnecting" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 rounded-xl border border-line bg-bg/70 p-2 text-xs text-muted",
+				children: "Reconnecting…"
+			}) : null,
+			error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 rounded-xl border border-red-400/40 bg-red-500/10 p-2 text-xs",
+				children: error
+			}) : null,
+			notice ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 text-xs text-muted",
+				children: notice
+			}) : null,
+			sharing ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 text-xs text-primary",
+				children: "You're sharing your screen."
+			}) : null
+		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "grid content-start gap-3 sm:grid-cols-2",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
+						stream: localStream,
+						label: `${nameRef.current || "You"} (you)`,
+						muted: true,
+						mirror: true,
+						showVideo: camOn,
+						micOff: !micOn
+					}),
+					remoteList.map(([id, r]) => {
+						const label = r.name || "Guest";
+						const waiting = !r.camera && r.media && now - r.joinedAt > 15e3;
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "contents",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
+								stream: r.camera,
+								label,
+								showVideo: r.cam,
+								micOff: !r.mic && r.media,
+								note: !r.camera && r.media ? waiting ? "Still connecting… strict networks (school, work, mobile data) can block calls." : "Connecting…" : void 0
+							}), r.screen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoTile, {
+								stream: r.screen,
+								label: `${label}'s screen`,
+								wide: true
+							}) : null]
+						}, id);
+					}),
+					remoteList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid aspect-video place-items-center rounded-2xl border border-dashed border-line p-4 text-center text-sm text-muted",
+						children: [
+							"Waiting for others. Share the room code ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-mono",
+								children: room
+							}),
+							"."
+						]
+					}) : null
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, {
+				className: "flex min-h-[18rem] flex-col gap-3 lg:max-h-[34rem]",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "font-display text-base font-semibold",
+						children: "Chat"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 space-y-2 overflow-y-auto pr-1 text-sm",
+						"aria-live": "polite",
+						children: [
+							messages.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-muted",
+								children: "No messages yet. Chat disappears when you leave."
+							}) : null,
+							messages.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: cn("flex flex-col", m.from === "me" ? "items-end" : "items-start"),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] text-muted",
+									children: m.from === "me" ? "You" : remotes[m.from]?.name ?? m.fallbackName
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: cn("max-w-[90%] whitespace-pre-wrap break-words rounded-xl px-3 py-1.5", m.from === "me" ? "bg-primary/15" : "border border-line bg-bg/70"),
+									children: m.text
+								})]
+							}, m.id)),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: chatEndRef })
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						className: "flex gap-2",
+						onSubmit: (e) => {
+							e.preventDefault();
+							sendChat();
+						},
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							className: "field",
+							value: draft,
+							maxLength: 500,
+							placeholder: "Type a message",
+							"aria-label": "Chat message",
+							onChange: (e) => setDraft(e.target.value)
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							className: "btn btn-primary shrink-0",
+							type: "submit",
+							disabled: !draft.trim(),
+							"aria-label": "Send message",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "size-4" })
+						})]
+					})
+				]
+			})]
+		})]
 	});
 }
 /** One server function for every profile / friends / groups action (dispatched by `op` on the server). */
@@ -21726,6 +22371,10 @@ function AppShell() {
 						view === "focus" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FocusView, {}) : null,
 						view === "bestiary" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BestiaryView, { onJump: setView }) : null,
 						view === "ai" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AiView, {}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: view === "call" ? "" : "hidden",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CallView, {})
+						}),
 						view === "lifts" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LiftsView, {}) : null,
 						view === "calories" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CaloriesView, {}) : null,
 						view === "nutrients" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NutrientsView, {}) : null,

@@ -478,6 +478,125 @@ var LogOut = createLucideIcon("log-out", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var MicOff = createLucideIcon("mic-off", [
+	["line", {
+		x1: "2",
+		x2: "22",
+		y1: "2",
+		y2: "22",
+		key: "a6p6uj"
+	}],
+	["path", {
+		d: "M18.89 13.23A7.12 7.12 0 0 0 19 12v-2",
+		key: "80xlxr"
+	}],
+	["path", {
+		d: "M5 10v2a7 7 0 0 0 12 5",
+		key: "p2k8kg"
+	}],
+	["path", {
+		d: "M15 9.34V5a3 3 0 0 0-5.68-1.33",
+		key: "1gzdoj"
+	}],
+	["path", {
+		d: "M9 9v3a3 3 0 0 0 5.12 2.12",
+		key: "r2i35w"
+	}],
+	["line", {
+		x1: "12",
+		x2: "12",
+		y1: "19",
+		y2: "22",
+		key: "x3vr5v"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Mic = createLucideIcon("mic", [
+	["path", {
+		d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z",
+		key: "131961"
+	}],
+	["path", {
+		d: "M19 10v2a7 7 0 0 1-14 0v-2",
+		key: "1vc78b"
+	}],
+	["line", {
+		x1: "12",
+		x2: "12",
+		y1: "19",
+		y2: "22",
+		key: "x3vr5v"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var MonitorOff = createLucideIcon("monitor-off", [
+	["path", {
+		d: "M17 17H4a2 2 0 0 1-2-2V5c0-1.5 1-2 1-2",
+		key: "k0q8oc"
+	}],
+	["path", {
+		d: "M22 15V5a2 2 0 0 0-2-2H9",
+		key: "cp1ac0"
+	}],
+	["path", {
+		d: "M8 21h8",
+		key: "1ev6f3"
+	}],
+	["path", {
+		d: "M12 17v4",
+		key: "1riwvh"
+	}],
+	["path", {
+		d: "m2 2 20 20",
+		key: "1ooewy"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Monitor = createLucideIcon("monitor", [
+	["rect", {
+		width: "20",
+		height: "14",
+		x: "2",
+		y: "3",
+		rx: "2",
+		key: "48i651"
+	}],
+	["line", {
+		x1: "8",
+		x2: "16",
+		y1: "21",
+		y2: "21",
+		key: "1svkeh"
+	}],
+	["line", {
+		x1: "12",
+		x2: "12",
+		y1: "17",
+		y2: "21",
+		key: "vw1qmm"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Moon = createLucideIcon("moon", [["path", {
 	d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z",
 	key: "a7tn18"
@@ -908,6 +1027,43 @@ var Utensils = createLucideIcon("utensils", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var VideoOff = createLucideIcon("video-off", [
+	["path", {
+		d: "M10.66 6H14a2 2 0 0 1 2 2v2.5l5.248-3.062A.5.5 0 0 1 22 7.87v8.196",
+		key: "w8jjjt"
+	}],
+	["path", {
+		d: "M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2",
+		key: "1xawa7"
+	}],
+	["path", {
+		d: "m2 2 20 20",
+		key: "1ooewy"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Video = createLucideIcon("video", [["path", {
+	d: "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5",
+	key: "ftymec"
+}], ["rect", {
+	x: "2",
+	y: "6",
+	width: "14",
+	height: "12",
+	rx: "2",
+	key: "158x01"
+}]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Volume2 = createLucideIcon("volume-2", [
 	["path", {
 		d: "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
@@ -972,4 +1128,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { Flame as A, BookOpen as B, NotebookPen as C, ListChecks as D, Lock as E, ChevronLeft as F, Activity as G, Award as H, ChevronDown as I, Check as L, Download as M, Copy as N, LayoutDashboard as O, ChevronRight as P, ChartColumn as R, Palette as S, LogOut as T, Apple as U, Bell as V, AlarmClock as W, RotateCcw as _, Utensils as a, Pill as b, UserMinus as c, Trash2 as d, Timer as f, Search as g, Send as h, Volume2 as i, Dumbbell as j, Heart as k, Upload as l, Sparkles as m, Wrench as n, Users as o, Square as p, VolumeX as r, UserPlus as s, X as t, TriangleAlert as u, Play as v, Moon as w, Pause as x, Pin as y, Bot as z };
+export { MicOff as A, ChevronRight as B, Pause as C, Monitor as D, Moon as E, Heart as F, Bot as G, ChevronDown as H, Flame as I, Award as J, BookOpen as K, Dumbbell as L, Lock as M, ListChecks as N, MonitorOff as O, LayoutDashboard as P, Download as R, Pill as S, NotebookPen as T, Check as U, ChevronLeft as V, ChartColumn as W, AlarmClock as X, Apple as Y, Activity as Z, Send as _, Video as a, Play as b, Users as c, Upload as d, TriangleAlert as f, Sparkles as g, Square as h, Volume2 as i, LogOut as j, Mic as k, UserPlus as l, Timer as m, Wrench as n, VideoOff as o, Trash2 as p, Bell as q, VolumeX as r, Utensils as s, X as t, UserMinus as u, Search as v, Palette as w, Pin as x, RotateCcw as y, Copy as z };

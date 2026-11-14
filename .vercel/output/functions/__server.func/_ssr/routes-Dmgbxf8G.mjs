@@ -1,6 +1,6 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui/react-collection+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dm00ovFF.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dmgbxf8G.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Splash() {
@@ -31,7 +31,7 @@ function Splash() {
 function Home() {
 	const [App, setApp] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
-		import("./app-shell-SGNxm6XJ.mjs").then((mod) => setApp(() => mod.AppShell));
+		import("./app-shell-Bq3y8a7J.mjs").then((mod) => setApp(() => mod.AppShell));
 	}, []);
 	if (!App) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Splash, {});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(App, {});

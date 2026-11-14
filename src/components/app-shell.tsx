@@ -16,6 +16,7 @@ import { AlarmsView } from "@/components/views/alarms";
 import { AlertsView } from "@/components/views/alerts";
 import { CaloriesView } from "@/components/views/calories";
 import { BestiaryView } from "@/components/views/bestiary";
+import { CallView } from "@/components/views/call";
 import { FocusView } from "@/components/views/focus";
 import { FriendsView } from "@/components/views/friends";
 import { GroupsView } from "@/components/views/groups";
@@ -249,6 +250,9 @@ export function AppShell() {
           {view === "focus" ? <FocusView /> : null}
           {view === "bestiary" ? <BestiaryView onJump={setView} /> : null}
           {view === "ai" ? <AiView /> : null}
+          <div className={view === "call" ? "" : "hidden"}>
+            <CallView />
+          </div>
           {view === "lifts" ? <LiftsView /> : null}
           {view === "calories" ? <CaloriesView /> : null}
           {view === "nutrients" ? <NutrientsView /> : null}

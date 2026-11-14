@@ -17,6 +17,7 @@ import {
   Timer,
   UserPlus,
   Users,
+  Video,
   Utensils,
   Wrench,
   type LucideIcon,
@@ -40,6 +41,7 @@ export type ViewId =
   | "insights"
   | "friends"
   | "groups"
+  | "call"
   | "themes";
 
 export type GroupId = "physical" | "utility" | "social";
@@ -79,6 +81,7 @@ export const VIEWS: ViewDef[] = [
   { id: "insights", label: "Insights", icon: BarChart3 },
   { id: "friends", label: "Friends", icon: UserPlus },
   { id: "groups", label: "Groups", icon: Users },
+  { id: "call", label: "Call", icon: Video },
   { id: "themes", label: "Themes", icon: Palette },
 ];
 
@@ -99,7 +102,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
     id: "social",
     label: "Social",
     icon: Users,
-    subgroups: ["friends", "groups"],
+    subgroups: ["friends", "groups", "call"],
   },
 ];
 
